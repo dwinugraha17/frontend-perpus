@@ -28,7 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
     "Bisnis",
     "Sains",
     "Sejarah",
-    "Desain"
+    "Desain",
   ];
   String _selectedCategory = "Semua";
 
@@ -56,15 +56,16 @@ class _HomeScreenState extends State<HomeScreen> {
     final filteredBooks = _selectedCategory == "Semua"
         ? library.books
         : library.books
-            .where((book) => book.category == _selectedCategory)
-            .toList();
+              .where((book) => book.category == _selectedCategory)
+              .toList();
 
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        surfaceTintColor: Colors.transparent, // Mencegah perubahan warna saat scroll
+        surfaceTintColor:
+            Colors.transparent, // Mencegah perubahan warna saat scroll
         titleSpacing: 20,
         title: Row(
           children: [
@@ -74,7 +75,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: primaryColor.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(Icons.menu_book_rounded, color: primaryColor, size: 20),
+              child: Icon(
+                Icons.menu_book_rounded,
+                color: primaryColor,
+                size: 20,
+              ),
             ),
             const SizedBox(width: 12),
             Text(
@@ -127,13 +132,16 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
                 children: [
-                  Text('Rekomendasi',
-                      style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: textPrimary)),
+                  Text(
+                    'Rekomendasi',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: textPrimary,
+                    ),
+                  ),
                   const Spacer(),
-                  Icon(Icons.arrow_forward_ios, size: 14, color: textSecondary)
+                  Icon(Icons.arrow_forward_ios, size: 14, color: textSecondary),
                 ],
               ),
             ),
@@ -145,11 +153,14 @@ class _HomeScreenState extends State<HomeScreen> {
             // --- 3. CATEGORY SECTION ---
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: Text("Kategori Pilihan",
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: textPrimary)),
+              child: Text(
+                "Kategori Pilihan",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: textPrimary,
+                ),
+              ),
             ),
             const SizedBox(height: 16),
             _buildCategoryList(),
@@ -159,15 +170,17 @@ class _HomeScreenState extends State<HomeScreen> {
             // --- LIST BUKU SECTION ---
             Container(
               constraints: BoxConstraints(
-                  minHeight: MediaQuery.of(context).size.height * 0.5),
+                minHeight: MediaQuery.of(context).size.height * 0.5,
+              ),
               decoration: const BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
                 boxShadow: [
                   BoxShadow(
-                      color: Color(0x0D000000),
-                      blurRadius: 20,
-                      offset: Offset(0, -5))
+                    color: Color(0x0D000000),
+                    blurRadius: 20,
+                    offset: Offset(0, -5),
+                  ),
                 ],
               ),
               padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
@@ -180,21 +193,28 @@ class _HomeScreenState extends State<HomeScreen> {
                       Text(
                         'Jelajahi Buku',
                         style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: textPrimary),
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: textPrimary,
+                        ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.grey.shade100,
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Text('${filteredBooks.length} Buku',
-                            style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: textSecondary)),
+                        child: Text(
+                          '${filteredBooks.length} Buku',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: textSecondary,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -202,35 +222,50 @@ class _HomeScreenState extends State<HomeScreen> {
                   library.isLoading
                       ? Center(
                           child: Padding(
-                          padding: const EdgeInsets.all(40.0),
-                          child: CircularProgressIndicator(color: primaryColor),
-                        ))
-                      : filteredBooks.isEmpty
-                          ? Center(
-                              child: Padding(
-                                padding: const EdgeInsets.all(40.0),
-                                child: Column(
-                                  children: [
-                                    Icon(Icons.search_off_rounded,
-                                        size: 60, color: Colors.grey[200]),
-                                    const SizedBox(height: 16),
-                                    Text("Buku tidak ditemukan",
-                                        style: TextStyle(color: textSecondary)),
-                                  ],
-                                ),
-                              ),
-                            )
-                          : ListView.separated(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: filteredBooks.length,
-                              separatorBuilder: (context, index) =>
-                                  const SizedBox(height: 16),
-                              itemBuilder: (context, index) {
-                                final book = filteredBooks[index];
-                                return _buildBookCard(context, book);
-                              },
+                            padding: const EdgeInsets.all(40.0),
+                            child: CircularProgressIndicator(
+                              color: primaryColor,
                             ),
+                          ),
+                        )
+                      : filteredBooks.isEmpty
+                      ? Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(40.0),
+                            child: Column(
+                              children: [
+                                Icon(
+                                  Icons.search_off_rounded,
+                                  size: 60,
+                                  color: Colors.grey[200],
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  "Buku tidak ditemukan",
+                                  style: TextStyle(color: textSecondary),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      // PERUBAHAN DISINI: Menggunakan GridView
+                      : GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2, // 2 Kolom
+                                crossAxisSpacing: 16, // Jarak horizontal
+                                mainAxisSpacing: 20, // Jarak vertikal
+                                childAspectRatio:
+                                    0.60, // Rasio lebar:tinggi kartu (diatur agar pas)
+                              ),
+                          itemCount: filteredBooks.length,
+                          itemBuilder: (context, index) {
+                            final book = filteredBooks[index];
+                            return _buildBookCard(context, book);
+                          },
+                        ),
                 ],
               ),
             ),
@@ -252,14 +287,17 @@ class _HomeScreenState extends State<HomeScreen> {
             text: TextSpan(
               children: [
                 TextSpan(
-                    text: 'Halo, ',
-                    style: TextStyle(fontSize: 24, color: textSecondary)),
+                  text: 'Halo, ',
+                  style: TextStyle(fontSize: 24, color: textSecondary),
+                ),
                 TextSpan(
-                    text: (auth.user?.name ?? "User").split(' ')[0],
-                    style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: textPrimary)),
+                  text: (auth.user?.name ?? "User").split(' ')[0],
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: textPrimary,
+                  ),
+                ),
                 const TextSpan(text: ' 👋'),
               ],
             ),
@@ -285,11 +323,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 icon: Icon(Icons.search_rounded, color: primaryColor),
                 suffixIcon: Container(
                   padding: const EdgeInsets.all(8),
-                  child: Icon(Icons.tune_rounded, color: textSecondary, size: 20),
+                  child: Icon(
+                    Icons.tune_rounded,
+                    color: textSecondary,
+                    size: 20,
+                  ),
                 ),
               ),
             ),
-          )
+          ),
         ],
       ),
     );
@@ -322,16 +364,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: isSelected ? primaryColor : Colors.white,
                 borderRadius: BorderRadius.circular(100),
                 border: Border.all(
-                  color:
-                      isSelected ? primaryColor : Colors.grey.shade300,
+                  color: isSelected ? primaryColor : Colors.grey.shade300,
                   width: 1,
                 ),
                 boxShadow: isSelected
                     ? [
                         BoxShadow(
-                            color: primaryColor.withOpacity(0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4))
+                          color: primaryColor.withOpacity(0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
                       ]
                     : [],
               ),
@@ -340,8 +382,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   category,
                   style: TextStyle(
                     color: isSelected ? Colors.white : textSecondary,
-                    fontWeight:
-                        isSelected ? FontWeight.w600 : FontWeight.normal,
+                    fontWeight: isSelected
+                        ? FontWeight.w600
+                        : FontWeight.normal,
                     fontSize: 13,
                   ),
                 ),
@@ -357,7 +400,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildCarousel(LibraryProvider library) {
     if (library.books.isEmpty) {
       return const SizedBox(
-          height: 180, child: Center(child: Text("Belum ada rekomendasi")));
+        height: 180,
+        child: Center(child: Text("Belum ada rekomendasi")),
+      );
     }
     return Column(
       children: [
@@ -374,7 +419,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       gradient: LinearGradient(
                         colors: [
                           primaryColor,
-                          const Color(0xFF1E40AF)
+                          const Color(0xFF1E40AF),
                         ], // Blue gradient
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
@@ -382,25 +427,30 @@ class _HomeScreenState extends State<HomeScreen> {
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                            color: primaryColor.withOpacity(0.3),
-                            blurRadius: 10,
-                            offset: const Offset(0, 5))
+                          color: primaryColor.withOpacity(0.3),
+                          blurRadius: 10,
+                          offset: const Offset(0, 5),
+                        ),
                       ],
                     ),
                   ),
                   // Background Decoration
                   Positioned(
-                      right: -30,
-                      top: -30,
-                      child: CircleAvatar(
-                          radius: 70,
-                          backgroundColor: Colors.white.withOpacity(0.08))),
+                    right: -30,
+                    top: -30,
+                    child: CircleAvatar(
+                      radius: 70,
+                      backgroundColor: Colors.white.withOpacity(0.08),
+                    ),
+                  ),
                   Positioned(
-                      bottom: -20,
-                      left: -10,
-                      child: CircleAvatar(
-                          radius: 40,
-                          backgroundColor: Colors.white.withOpacity(0.08))),
+                    bottom: -20,
+                    left: -10,
+                    child: CircleAvatar(
+                      radius: 40,
+                      backgroundColor: Colors.white.withOpacity(0.08),
+                    ),
+                  ),
 
                   // Content
                   Padding(
@@ -415,32 +465,44 @@ class _HomeScreenState extends State<HomeScreen> {
                             children: [
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 4),
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
                                 decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.2),
-                                    borderRadius: BorderRadius.circular(6)),
-                                child: const Text("Editor's Choice",
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.bold)),
+                                  color: Colors.white.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: const Text(
+                                  "Editor's Choice",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                               ),
                               const SizedBox(height: 12),
-                              Text(book.title,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      height: 1.2)),
+                              Text(
+                                book.title,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  height: 1.2,
+                                ),
+                              ),
                               const SizedBox(height: 6),
-                              Text(book.author,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                      color: Colors.white.withOpacity(0.8),
-                                      fontSize: 13)),
+                              Text(
+                                book.author,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: Colors.white.withOpacity(0.8),
+                                  fontSize: 13,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -454,23 +516,27 @@ class _HomeScreenState extends State<HomeScreen> {
                                 borderRadius: BorderRadius.circular(8),
                                 boxShadow: [
                                   BoxShadow(
-                                      color: Colors.black.withOpacity(0.3),
-                                      blurRadius: 12,
-                                      offset: const Offset(4, 6))
+                                    color: Colors.black.withOpacity(0.3),
+                                    blurRadius: 12,
+                                    offset: const Offset(4, 6),
+                                  ),
                                 ],
                               ),
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(8),
                                 child: CachedNetworkImage(
-                                    imageUrl: book.coverImage,
-                                    fit: BoxFit.cover,
-                                    height: 110,
-                                    placeholder: (context, url) => Container(
-                                        color: Colors.white.withOpacity(0.2)),
-                                    errorWidget: (context, url, error) =>
-                                        Container(
-                                            color: Colors.grey,
-                                            child: const Icon(Icons.book))),
+                                  imageUrl: book.coverImage,
+                                  fit: BoxFit.cover,
+                                  height: 110,
+                                  placeholder: (context, url) => Container(
+                                    color: Colors.white.withOpacity(0.2),
+                                  ),
+                                  errorWidget: (context, url, error) =>
+                                      Container(
+                                        color: Colors.grey,
+                                        child: const Icon(Icons.book),
+                                      ),
+                                ),
                               ),
                             ),
                           ),
@@ -483,12 +549,13 @@ class _HomeScreenState extends State<HomeScreen> {
             );
           }).toList(),
           options: CarouselOptions(
-              autoPlay: true,
-              aspectRatio: 2.2,
-              enlargeCenterPage: true,
-              viewportFraction: 0.88,
-              onPageChanged: (index, reason) =>
-                  setState(() => _currentCarousel = index)),
+            autoPlay: true,
+            aspectRatio: 2.2,
+            enlargeCenterPage: true,
+            viewportFraction: 0.88,
+            onPageChanged: (index, reason) =>
+                setState(() => _currentCarousel = index),
+          ),
         ),
         const SizedBox(height: 12),
         // Indicator
@@ -501,10 +568,11 @@ class _HomeScreenState extends State<HomeScreen> {
               height: 6,
               margin: const EdgeInsets.symmetric(horizontal: 2),
               decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(3),
-                  color: _currentCarousel == entry.key
-                      ? primaryColor
-                      : Colors.grey.shade300),
+                borderRadius: BorderRadius.circular(3),
+                color: _currentCarousel == entry.key
+                    ? primaryColor
+                    : Colors.grey.shade300,
+              ),
             );
           }).toList(),
         ),
@@ -512,19 +580,19 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // --- WIDGET KARTU BUKU (Improved Layout) ---
+  // --- WIDGET KARTU BUKU (Vertical & Clean Layout) ---
   Widget _buildBookCard(BuildContext context, dynamic book) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade100),
         boxShadow: [
           BoxShadow(
-              color: Colors.grey.withOpacity(0.06),
-              spreadRadius: 0,
-              blurRadius: 15,
-              offset: const Offset(0, 4)),
+            color: Colors.grey.withOpacity(0.08),
+            spreadRadius: 2,
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
         ],
       ),
       child: Material(
@@ -532,118 +600,164 @@ class _HomeScreenState extends State<HomeScreen> {
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (_) => BookDetailScreen(book: book))),
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Cover
-                Hero(
-                  tag: 'book-cover-${book.id ?? book.title}',
-                  child: Container(
-                    width: 75,
-                    height: 110,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4))
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: CachedNetworkImage(
-                        imageUrl: book.coverImage,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) =>
-                            Container(color: Colors.grey[100]),
-                        errorWidget: (context, url, error) => Container(
-                            color: Colors.grey[100],
-                            child: const Icon(Icons.broken_image,
-                                color: Colors.grey)),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                // Info
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                                color: Colors.blue.shade50,
-                                borderRadius: BorderRadius.circular(4)),
-                            child: Text(
-                              book.category.toUpperCase() ?? "UMUM",
-                              style: TextStyle(
-                                  fontSize: 9,
-                                  color: primaryColor,
-                                  fontWeight: FontWeight.w700),
+            context,
+            MaterialPageRoute(builder: (_) => BookDetailScreen(book: book)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 1. Cover Image (Bagian Atas)
+              Expanded(
+                child: Stack(
+                  children: [
+                    Hero(
+                      tag: 'book-cover-${book.id ?? book.title}',
+                      child: Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(16),
+                          ),
+                          color: Colors.grey[100],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(16),
+                          ),
+                          child: CachedNetworkImage(
+                            imageUrl: book.coverImage,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Center(
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: primaryColor,
+                              ),
+                            ),
+                            errorWidget: (context, url, error) => const Center(
+                              child: Icon(
+                                Icons.broken_image,
+                                color: Colors.grey,
+                              ),
                             ),
                           ),
-                          Icon(Icons.more_horiz,
-                              color: Colors.grey[300], size: 20)
-                        ],
+                        ),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        book.title,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: textPrimary,
-                            height: 1.2),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        book.author,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                            fontSize: 13,
-                            color: textSecondary,
-                            fontWeight: FontWeight.w400),
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Icon(Icons.star_rounded,
-                              size: 16, color: Colors.amber[400]),
-                          const SizedBox(width: 4),
-                          Text("4.8",
+                    ),
+                    // Rating Badge (Overlay Pojok Kanan Atas)
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.6),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.star_rounded,
+                              size: 12,
+                              color: Colors.amber,
+                            ),
+                            const SizedBox(width: 4),
+                            const Text(
+                              "4.8",
                               style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: textPrimary)),
-                          const SizedBox(width: 12),
-                          _buildStatusBadge(book.status),
-                        ],
-                      )
-                    ],
-                  ),
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+
+              // 2. Info Buku (Bagian Bawah)
+              Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Kategori
+                    Text(
+                      book.category.toUpperCase() ?? "UMUM",
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: primaryColor,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    // Judul
+                    Text(
+                      book.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: textPrimary,
+                        height: 1.2,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    // Penulis
+                    Text(
+                      book.author,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 12, color: textSecondary),
+                    ),
+                    const SizedBox(height: 10),
+                    // Status Availability (Minimalis)
+                    Row(
+                      children: [
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: book.status == 'Available'
+                                ? Colors.green
+                                : Colors.orange,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          book.status == 'Available' ? "Tersedia" : "Dipinjam",
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            color: book.status == 'Available'
+                                ? Colors.green[700]
+                                : Colors.orange[800],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
+  // --- WIDGET STATUS BADGE (Minimalis) ---
+
+  // ignore: unused_element
   Widget _buildStatusBadge(String status) {
     bool isAvailable = status == 'Available';
     return Row(
@@ -652,16 +766,18 @@ class _HomeScreenState extends State<HomeScreen> {
           width: 6,
           height: 6,
           decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: isAvailable ? Colors.green : Colors.orange),
+            shape: BoxShape.circle,
+            color: isAvailable ? Colors.green : Colors.orange,
+          ),
         ),
         const SizedBox(width: 6),
         Text(
           isAvailable ? "Tersedia" : "Dipinjam",
           style: TextStyle(
-              color: isAvailable ? Colors.green[700] : Colors.orange[800],
-              fontSize: 11,
-              fontWeight: FontWeight.w600),
+            color: isAvailable ? Colors.green[700] : Colors.orange[800],
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ],
     );

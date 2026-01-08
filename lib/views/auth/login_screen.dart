@@ -15,8 +15,10 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  
+  // 1. Tambahkan variabel untuk mengontrol visibilitas password
+  bool _obscurePassword = true;
 
-  // Logika tetap sama persis sesuai permintaan
   void _login() async {
     final auth = Provider.of<AuthProvider>(context, listen: false);
     final success = await auth.login(_emailController.text, _passwordController.text);
@@ -26,7 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(auth.errorMessage ?? 'Login failed'), // Tampilkan pesan spesifik
+          content: Text(auth.errorMessage ?? 'Login failed'),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
         ),
@@ -36,33 +38,32 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Menggunakan skema warna
     final primaryColor = Colors.blue.shade700;
 
     return Scaffold(
-      backgroundColor: Colors.grey[100], // Background agak abu lembut
+      backgroundColor: Colors.grey[100],
       body: SafeArea(
         child: Center(
-          child: SingleChildScrollView( // Agar tidak error saat keyboard muncul
+          child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // --- BAGIAN LOGO / HEADER ---
                 Container(
-                  padding: EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: Colors.blue.shade50,
                   ),
                   child: Icon(
-                    Icons.local_library_rounded, // Icon Perpustakaan
+                    Icons.local_library_rounded,
                     size: 64,
                     color: primaryColor,
                   ),
                 ),
-                SizedBox(height: 24),
-                Text(
+                const SizedBox(height: 24),
+                const Text(
                   'UNILAM Library',
                   style: TextStyle(
                     fontSize: 28,
@@ -75,10 +76,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   'Welcome back, please login',
                   style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                 ),
-                SizedBox(height: 48),
+                const SizedBox(height: 48),
 
                 // --- BAGIAN FORM ---
-                // Email Field
                 TextField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
@@ -102,15 +102,31 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
 
                 // Password Field
                 TextField(
                   controller: _passwordController,
-                  obscureText: true,
+                  // 2. Gunakan variabel _obscurePassword di sini
+                  obscureText: _obscurePassword, 
                   decoration: InputDecoration(
                     labelText: 'Password',
                     prefixIcon: Icon(Icons.lock_outline, color: primaryColor),
+                    // 3. Tambahkan suffixIcon untuk tombol toggle
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword 
+                            ? Icons.visibility_off_outlined 
+                            : Icons.visibility_outlined,
+                        color: Colors.grey,
+                      ),
+                      onPressed: () {
+                        // 4. Ubah state saat tombol ditekan
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
+                    ),
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
@@ -127,7 +143,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                 ),
-                SizedBox(height: 32),
+                const SizedBox(height: 32),
 
                 // --- BAGIAN TOMBOL ---
                 Consumer<AuthProvider>(
@@ -135,7 +151,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ? CircularProgressIndicator(color: primaryColor)
                       : SizedBox(
                           width: double.infinity,
-                          height: 55, // Tombol lebih tinggi
+                          height: 55,
                           child: ElevatedButton(
                             onPressed: _login,
                             style: ElevatedButton.styleFrom(
@@ -146,7 +162,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                             ),
-                            child: Text(
+                            child: const Text(
                               'Login',
                               style: TextStyle(
                                 fontSize: 16,
@@ -156,7 +172,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                 ),
-                SizedBox(height: 24),
+                const SizedBox(height: 24),
 
                 // --- FOOTER ---
                 Row(
@@ -164,7 +180,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     Text("Belum punya akun? ", style: TextStyle(color: Colors.grey[600])),
                     GestureDetector(
-                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => RegisterScreen())),
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RegisterScreen())),
                       child: Text(
                         'Daftar sekarang',
                         style: TextStyle(

@@ -101,10 +101,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final user = Provider.of<AuthProvider>(context).user;
     final isLoading = Provider.of<AuthProvider>(context).isLoading;
     
-    // Define colors
-    final primaryColor = const Color(0xFF2563EB); // Blue 600
-    final backgroundColor = const Color(0xFFF8FAFC); // Slate 50
-    final textPrimary = const Color(0xFF1E293B); // Slate 800
+    // Define colors based on Theme
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    final backgroundColor = Theme.of(context).scaffoldBackgroundColor;
+    final textPrimary = Theme.of(context).colorScheme.onSurface;
+    final cardColor = isDark ? const Color(0xFF1E293B) : Colors.white;
+    final inputFillColor = isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9); // Slate 700 / Slate 100
+    final textSecondary = isDark ? Colors.grey[400]! : const Color(0xFF64748B);
 
     // Logika Tampilan Gambar
     ImageProvider? backgroundImage;
@@ -129,10 +133,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             fontSize: 20,
           )
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: cardColor,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
+        iconTheme: IconThemeData(color: textPrimary),
         leading: IconButton(
           icon: Icon(Icons.arrow_back_ios_new, color: textPrimary, size: 20),
           onPressed: () => Navigator.pop(context),
@@ -153,7 +158,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       padding: const EdgeInsets.all(4),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.white,
+                        color: cardColor,
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withValues(alpha: 0.05),
@@ -164,10 +169,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       ),
                       child: CircleAvatar(
                         radius: 65,
-                        backgroundColor: const Color(0xFFF1F5F9), // Slate 100
+                        backgroundColor: inputFillColor,
                         backgroundImage: backgroundImage,
                         child: (backgroundImage == null)
-                            ? const Icon(Icons.person, size: 60, color: Color(0xFF94A3B8))
+                            ? Icon(Icons.person, size: 60, color: textSecondary)
                             : null,
                       ),
                     ),
@@ -182,7 +187,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           decoration: BoxDecoration(
                             color: primaryColor,
                             shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 3),
+                            border: Border.all(color: cardColor, width: 3),
                             boxShadow: [
                               BoxShadow(
                                 color: primaryColor.withValues(alpha: 0.3),
@@ -201,7 +206,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               const SizedBox(height: 16),
               Text(
                 'Ketuk ikon kamera untuk mengganti foto', 
-                style: TextStyle(color: const Color(0xFF64748B), fontSize: 13),
+                style: TextStyle(color: textSecondary, fontSize: 13),
               ),
               const SizedBox(height: 40),
 
@@ -209,7 +214,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: cardColor,
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
@@ -226,6 +231,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       label: 'Nama Lengkap',
                       icon: Icons.person_outline_rounded,
                       validator: (value) => value!.isEmpty ? 'Nama tidak boleh kosong' : null,
+                      primaryColor: primaryColor,
+                      fillColor: inputFillColor,
+                      textPrimary: textPrimary,
+                      textSecondary: textSecondary,
                     ),
                     const SizedBox(height: 20),
                     _buildTextField(
@@ -234,6 +243,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       icon: Icons.phone_android_rounded,
                       inputType: TextInputType.phone,
                       validator: (value) => value!.isEmpty ? 'Nomor telepon tidak boleh kosong' : null,
+                      primaryColor: primaryColor,
+                      fillColor: inputFillColor,
+                      textPrimary: textPrimary,
+                      textSecondary: textSecondary,
                     ),
                   ],
                 ),
@@ -278,20 +291,22 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     required IconData icon,
     TextInputType inputType = TextInputType.text,
     String? Function(String?)? validator,
+    required Color primaryColor,
+    required Color fillColor,
+    required Color textPrimary,
+    required Color textSecondary,
   }) {
-    final primaryColor = const Color(0xFF2563EB);
-    
     return TextFormField(
       controller: controller,
       keyboardType: inputType,
       validator: validator,
-      style: const TextStyle(color: Color(0xFF1E293B), fontWeight: FontWeight.w500),
+      style: TextStyle(color: textPrimary, fontWeight: FontWeight.w500),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: const TextStyle(color: Color(0xFF64748B)),
+        labelStyle: TextStyle(color: textSecondary),
         prefixIcon: Icon(icon, color: primaryColor),
         filled: true,
-        fillColor: const Color(0xFFF1F5F9), // Slate 100
+        fillColor: fillColor, // Slate 100 or Slate 700
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,

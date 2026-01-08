@@ -38,7 +38,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       // Perbaikan tampilan SnackBar
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Registration failed'),
+          content: Text(auth.errorMessage ?? 'Registration failed'),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
         )

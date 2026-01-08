@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -33,6 +34,8 @@ class AuthProvider with ChangeNotifier {
         final body = jsonDecode(response.body);
         _errorMessage = body['message'] ?? 'Login gagal. Cek email/password.';
       }
+    } on TimeoutException {
+      _errorMessage = 'Koneksi timeout. Pastikan server berjalan dan IP benar.';
     } catch (e) {
       debugPrint(e.toString());
       _errorMessage = 'Gagal terhubung ke server. Cek koneksi internet.';
@@ -44,6 +47,7 @@ class AuthProvider with ChangeNotifier {
 
   Future<bool> register(String name, String email, String password, String phoneNumber) async {
     _isLoading = true;
+    _errorMessage = null;
     notifyListeners();
     try {
       final response = await _apiService.post('/register', {
@@ -62,9 +66,26 @@ class AuthProvider with ChangeNotifier {
         _isLoading = false;
         notifyListeners();
         return true;
+      } else {
+        final body = jsonDecode(response.body);
+        // Handle Laravel validation errors
+        if (body['errors'] != null) {
+          final Map<String, dynamic> errors = body['errors'];
+          if (errors.isNotEmpty) {
+             final firstKey = errors.keys.first;
+             _errorMessage = errors[firstKey][0].toString();
+          } else {
+             _errorMessage = body['message'] ?? 'Registration failed';
+          }
+        } else {
+          _errorMessage = body['message'] ?? 'Registration failed';
+        }
       }
+    } on TimeoutException {
+      _errorMessage = 'Koneksi timeout. Pastikan server berjalan dan IP benar.';
     } catch (e) {
       debugPrint(e.toString());
+      _errorMessage = 'Gagal terhubung ke server. Cek koneksi internet.';
     }
     _isLoading = false;
     notifyListeners();
@@ -114,6 +135,29 @@ class AuthProvider with ChangeNotifier {
       }
     } catch (e) {
       debugPrint('Update profile error: $e');
+    }
+    _isLoading = false;
+    notifyListeners();
+    return false;
+  }
+
+  Future<bool> deleteAccount() async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final response = await _apiService.delete('/user');
+      if (response.statusCode == 200) {
+        await logout(); // Logout and clear data
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        final body = jsonDecode(response.body);
+        _errorMessage = body['message'] ?? 'Failed to delete account';
+      }
+    } catch (e) {
+      debugPrint('Delete account error: $e');
+      _errorMessage = 'Failed to delete account';
     }
     _isLoading = false;
     notifyListeners();

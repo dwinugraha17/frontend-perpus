@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:unilam_library/providers/auth_provider.dart';
+import 'package:unilam_library/providers/settings_provider.dart';
 import 'package:unilam_library/views/auth/login_screen.dart';
 import 'package:unilam_library/views/profile/edit_profile_screen.dart';
 
@@ -11,13 +12,16 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final auth = Provider.of<AuthProvider>(context);
+    final settings = Provider.of<SettingsProvider>(context);
     final user = auth.user;
 
-    // Define colors
-    final primaryColor = const Color(0xFF2563EB); // Blue 600
-    final backgroundColor = const Color(0xFFF8FAFC); // Slate 50
-    final textPrimary = const Color(0xFF1E293B); // Slate 800
-    final textSecondary = const Color(0xFF64748B); // Slate 500
+    // Define colors based on Theme
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    final backgroundColor = Theme.of(context).scaffoldBackgroundColor;
+    final textPrimary = Theme.of(context).colorScheme.onSurface;
+    final textSecondary = isDark ? Colors.grey[400]! : const Color(0xFF64748B);
+    final cardColor = isDark ? const Color(0xFF1E293B) : Colors.white;
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -46,7 +50,7 @@ class ProfileScreen extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: cardColor,
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
@@ -74,16 +78,16 @@ class ProfileScreen extends StatelessWidget {
                               imageUrl: user.profilePhoto!,
                               fit: BoxFit.cover,
                               placeholder: (context, url) => Container(
-                                color: Colors.grey[100],
+                                color: isDark ? Colors.grey[800] : Colors.grey[100],
                                 child: const Center(child: CircularProgressIndicator()),
                               ),
                               errorWidget: (context, url, error) => Container(
-                                color: Colors.grey[100],
+                                color: isDark ? Colors.grey[800] : Colors.grey[100],
                                 child: Icon(Icons.person, size: 48, color: Colors.grey[400]),
                               ),
                             )
                           : Container(
-                              color: Colors.grey[100],
+                              color: isDark ? Colors.grey[800] : Colors.grey[100],
                               child: Icon(Icons.person, size: 48, color: Colors.grey[400]),
                             ),
                     ),
@@ -121,11 +125,11 @@ class ProfileScreen extends StatelessWidget {
             const SizedBox(height: 32),
             
             // --- SECTION INFO PRIBADI ---
-            _buildSectionHeader("Informasi Pribadi"),
+            _buildSectionHeader("Informasi Pribadi", textSecondary),
             const SizedBox(height: 12),
             Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: cardColor,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
@@ -143,6 +147,8 @@ class ProfileScreen extends StatelessWidget {
                     subtitle: user?.phoneNumber ?? '-',
                     isLast: true,
                     iconColor: primaryColor,
+                    textColor: textPrimary,
+                    subtitleColor: textSecondary,
                   ),
                 ],
               ),
@@ -150,12 +156,100 @@ class ProfileScreen extends StatelessWidget {
 
             const SizedBox(height: 32),
 
-            // --- SECTION PENGATURAN ---
-            _buildSectionHeader("Akun & Keamanan"),
+            // --- SECTION TAMPILAN ---
+            _buildSectionHeader("Tampilan", textSecondary),
             const SizedBox(height: 12),
             Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: cardColor,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.02),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  _buildSwitchTile(
+                    icon: Icons.dark_mode_outlined,
+                    title: 'Dark Mode',
+                    value: settings.darkMode,
+                    onChanged: (val) => settings.toggleDarkMode(val),
+                    iconColor: primaryColor,
+                    textColor: textPrimary,
+                    isLast: true,
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 32),
+
+            // --- SECTION NOTIFIKASI ---
+            _buildSectionHeader("Notifikasi", textSecondary),
+            const SizedBox(height: 12),
+            Container(
+              decoration: BoxDecoration(
+                color: cardColor,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.02),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  _buildSwitchTile(
+                    icon: Icons.notifications_none_rounded,
+                    title: 'Push Notification',
+                    value: settings.pushNotification,
+                    onChanged: (val) => settings.togglePush(val),
+                    iconColor: primaryColor,
+                    textColor: textPrimary,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Divider(height: 1, color: isDark ? Colors.grey[800] : Colors.grey[100]),
+                  ),
+                  _buildSwitchTile(
+                    icon: Icons.email_outlined,
+                    title: 'Email Notification',
+                    value: settings.emailNotification,
+                    onChanged: (val) => settings.toggleEmail(val),
+                    iconColor: primaryColor,
+                    textColor: textPrimary,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Divider(height: 1, color: isDark ? Colors.grey[800] : Colors.grey[100]),
+                  ),
+                  _buildSwitchTile(
+                    icon: Icons.sms_outlined,
+                    title: 'SMS Notification',
+                    value: settings.smsNotification,
+                    onChanged: (val) => settings.toggleSms(val),
+                    iconColor: primaryColor,
+                    textColor: textPrimary,
+                    isLast: true,
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 32),
+
+            // --- SECTION PENGATURAN AKUN ---
+            _buildSectionHeader("Akun & Keamanan", textSecondary),
+            const SizedBox(height: 12),
+            Container(
+              decoration: BoxDecoration(
+                color: cardColor,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
@@ -172,13 +266,15 @@ class ProfileScreen extends StatelessWidget {
                     title: 'Edit Profil',
                     subtitle: 'Ubah nama, foto, dan info lainnya',
                     iconColor: primaryColor,
+                    textColor: textPrimary,
+                    subtitleColor: textSecondary,
                     onTap: () {
                       Navigator.push(context, MaterialPageRoute(builder: (_) => const EditProfileScreen()));
                     },
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Divider(height: 1, color: Colors.grey[100]),
+                    child: Divider(height: 1, color: isDark ? Colors.grey[800] : Colors.grey[100]),
                   ),
                   _buildProfileTile(
                     icon: Icons.logout_rounded,
@@ -186,8 +282,22 @@ class ProfileScreen extends StatelessWidget {
                     subtitle: 'Keluar dari akun aplikasi',
                     textColor: const Color(0xFFDC2626), // Red 600
                     iconColor: const Color(0xFFDC2626),
+                    subtitleColor: textSecondary,
+                    onTap: () => _showLogoutDialog(context, auth, isDark),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Divider(height: 1, color: isDark ? Colors.grey[800] : Colors.grey[100]),
+                  ),
+                  _buildProfileTile(
+                    icon: Icons.delete_forever_rounded,
+                    title: 'Hapus Akun',
+                    subtitle: 'Hapus akun dan data secara permanen',
+                    textColor: const Color(0xFFDC2626), // Red 600
+                    iconColor: const Color(0xFFDC2626),
+                    subtitleColor: textSecondary,
                     isLast: true,
-                    onTap: () => _showLogoutDialog(context, auth),
+                    onTap: () => _showDeleteAccountDialog(context, auth, isDark),
                   ),
                 ],
               ),
@@ -207,17 +317,17 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionHeader(String title) {
+  Widget _buildSectionHeader(String title, Color color) {
     return Padding(
       padding: const EdgeInsets.only(left: 8.0),
       child: Align(
         alignment: Alignment.centerLeft,
         child: Text(
           title, 
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14, 
             fontWeight: FontWeight.bold, 
-            color: Color(0xFF64748B), // Slate 500
+            color: color,
             letterSpacing: 0.5,
           ),
         ),
@@ -231,8 +341,9 @@ class ProfileScreen extends StatelessWidget {
     required String title,
     required String subtitle,
     VoidCallback? onTap,
-    Color textColor = const Color(0xFF1E293B), // Slate 800
-    Color iconColor = const Color(0xFF2563EB), // Blue 600
+    required Color textColor,
+    required Color iconColor,
+    required Color subtitleColor,
     bool isLast = false,
   }) {
     return Material(
@@ -270,7 +381,7 @@ class ProfileScreen extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       subtitle, 
-                      style: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8)) // Slate 400
+                      style: TextStyle(fontSize: 12, color: subtitleColor) 
                     ),
                   ],
                 ),
@@ -283,21 +394,69 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildSwitchTile({
+    required IconData icon,
+    required String title,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+    required Color iconColor,
+    required Color textColor,
+    bool isLast = false,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      decoration: BoxDecoration(
+         borderRadius: isLast 
+            ? const BorderRadius.vertical(bottom: Radius.circular(20))
+            : const BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: iconColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: iconColor, size: 22),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              title, 
+              style: TextStyle(
+                fontWeight: FontWeight.w600, 
+                fontSize: 15, 
+                color: textColor
+              ),
+            ),
+          ),
+          Switch.adaptive(
+            value: value,
+            onChanged: onChanged,
+            // ignore: deprecated_member_use
+            activeColor: iconColor,
+          ),
+        ],
+      ),
+    );
+  }
+
   // --- LOGOUT DIALOG ---
-  void _showLogoutDialog(BuildContext context, AuthProvider auth) {
+  void _showLogoutDialog(BuildContext context, AuthProvider auth, bool isDark) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        backgroundColor: Colors.white,
-        title: const Text('Konfirmasi Logout', style: TextStyle(fontWeight: FontWeight.bold)),
-        content: const Text('Apakah Anda yakin ingin keluar dari aplikasi?', style: TextStyle(color: Color(0xFF64748B))),
+        backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+        title: Text('Konfirmasi Logout', style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black)),
+        content: Text('Apakah Anda yakin ingin keluar dari aplikasi?', style: TextStyle(color: isDark ? Colors.grey[400] : const Color(0xFF64748B))),
         actionsPadding: const EdgeInsets.all(20),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             style: TextButton.styleFrom(
-              foregroundColor: const Color(0xFF64748B),
+              foregroundColor: isDark ? Colors.grey[400] : const Color(0xFF64748B),
             ),
             child: const Text('Batal'),
           ),
@@ -319,6 +478,59 @@ class ProfileScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             ),
             child: const Text('Ya, Keluar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // --- DELETE ACCOUNT DIALOG ---
+  void _showDeleteAccountDialog(BuildContext context, AuthProvider auth, bool isDark) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+        title: Text('Hapus Akun?', style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black)),
+        content: Text(
+          'Tindakan ini tidak dapat dibatalkan. Semua data Anda akan dihapus secara permanen.',
+          style: TextStyle(color: isDark ? Colors.grey[400] : const Color(0xFF64748B)),
+        ),
+        actionsPadding: const EdgeInsets.all(20),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            style: TextButton.styleFrom(
+              foregroundColor: isDark ? Colors.grey[400] : const Color(0xFF64748B),
+            ),
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(ctx); // Close dialog
+              final success = await auth.deleteAccount();
+              if (success && context.mounted) {
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                  (route) => false,
+                );
+              } else if (context.mounted) {
+                 ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(auth.errorMessage ?? 'Gagal menghapus akun'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFDC2626),
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            ),
+            child: const Text('Hapus Permanen'),
           ),
         ],
       ),

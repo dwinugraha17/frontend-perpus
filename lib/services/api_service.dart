@@ -26,7 +26,7 @@ class ApiService {
       Uri.parse('${AppConstants.baseUrl}$endpoint'),
       headers: headers,
       body: jsonEncode(body),
-    );
+    ).timeout(const Duration(seconds: 10));
   }
 
   Future<http.Response> get(String endpoint) async {
@@ -34,7 +34,15 @@ class ApiService {
     return await http.get(
       Uri.parse('${AppConstants.baseUrl}$endpoint'),
       headers: headers,
-    );
+    ).timeout(const Duration(seconds: 10));
+  }
+
+  Future<http.Response> delete(String endpoint) async {
+    final headers = await _getHeaders();
+    return await http.delete(
+      Uri.parse('${AppConstants.baseUrl}$endpoint'),
+      headers: headers,
+    ).timeout(const Duration(seconds: 10));
   }
 
   Future<http.Response> postMultipart(String endpoint, Map<String, String> fields, XFile? file) async {
@@ -56,7 +64,7 @@ class ApiService {
         request.files.add(await http.MultipartFile.fromPath('profile_photo', file.path));
       }
     }
-    var streamedResponse = await request.send();
+    var streamedResponse = await request.send().timeout(const Duration(seconds: 30));
     return await http.Response.fromStream(streamedResponse);
   }
 }
