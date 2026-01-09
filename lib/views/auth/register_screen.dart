@@ -17,7 +17,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  // Logika register tetap sama
+  // 1. TAMBAHKAN STATE UNTUK VISIBILITAS PASSWORD
+  bool _obscurePassword = true;
+
   void _register() async {
     final auth = Provider.of<AuthProvider>(context, listen: false);
     final success = await auth.register(
@@ -35,7 +37,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
         (route) => false,
       );
     } else {
-      // Perbaikan tampilan SnackBar
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(auth.errorMessage ?? 'Registration failed'),
@@ -46,13 +47,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
-  // Helper widget untuk membuat TextField agar kode lebih rapi
+  // 2. UPDATE HELPER WIDGET UNTUK MENERIMA SUFFIX ICON
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
     required IconData icon,
     bool isPassword = false,
     TextInputType inputType = TextInputType.text,
+    Widget? suffixIcon, // Parameter baru optional
   }) {
     final primaryColor = Colors.blue.shade700;
     return TextField(
@@ -62,9 +64,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon, color: primaryColor),
+        suffixIcon: suffixIcon, // Gunakan di sini
         filled: true,
         fillColor: Colors.white,
-        contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
@@ -87,23 +90,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      // AppBar transparan agar terlihat modern
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios_new, color: Colors.black87),
+          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black87),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // --- HEADER ---
-              Text(
+              const Text(
                 'Create Account',
                 style: TextStyle(
                   fontSize: 28,
@@ -111,12 +113,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   color: Colors.black87,
                 ),
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Text(
                 'Join UNILAM Library to start reading',
                 style: TextStyle(fontSize: 14, color: Colors.grey[600]),
               ),
-              SizedBox(height: 32),
+              const SizedBox(height: 32),
 
               // --- FORM ---
               _buildTextField(
@@ -124,7 +126,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 label: 'Full Name',
                 icon: Icons.person_outline,
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               
               _buildTextField(
                 controller: _emailController,
@@ -132,23 +134,37 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 icon: Icons.email_outlined,
                 inputType: TextInputType.emailAddress,
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               
               _buildTextField(
                 controller: _phoneController,
                 label: 'Phone Number (WhatsApp)',
-                icon: Icons.chat_bubble_outline, // Icon chat karena WA
+                icon: Icons.chat_bubble_outline,
                 inputType: TextInputType.phone,
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               
+              // 3. IMPLEMENTASI LOGIKA SHOW/HIDE PASSWORD DI SINI
               _buildTextField(
                 controller: _passwordController,
                 label: 'Password',
                 icon: Icons.lock_outline,
-                isPassword: true,
+                isPassword: _obscurePassword, // Menggunakan variabel state
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    // Ikon berubah sesuai state
+                    _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                    color: Colors.grey,
+                  ),
+                  onPressed: () {
+                    // Mengubah state saat ditekan
+                    setState(() {
+                      _obscurePassword = !_obscurePassword;
+                    });
+                  },
+                ),
               ),
-              SizedBox(height: 32),
+              const SizedBox(height: 32),
 
               // --- TOMBOL ---
               Consumer<AuthProvider>(
@@ -167,7 +183,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child: Text(
+                          child: const Text(
                             'Register',
                             style: TextStyle(
                               fontSize: 16,
@@ -179,7 +195,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               
               // --- FOOTER ---
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -196,7 +212,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                 ],
               ),
-              SizedBox(height: 20), // Extra space di bawah
+              const SizedBox(height: 20),
             ],
           ),
         ),

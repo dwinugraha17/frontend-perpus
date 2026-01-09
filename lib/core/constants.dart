@@ -1,14 +1,12 @@
 import 'package:flutter/foundation.dart';
 
 class AppConstants {
-  // GANTI URL INI dengan domain dari ngrok kamu
-  // Contoh: 'https://1234-56-789-012-345.ngrok-free.app/api' (URL ngrok yang diberikan)
-  // atau URL deployment backend kamu jika sudah di-deploy
-  static const String? _backendUrl = 'https://preborn-unpiteous-neriah.ngrok-free.dev/api'; // Ganti null dengan URL ngrok kamu
+  // GANTI URL INI dengan domain dari Railway deployment kamu
+  static const String? _railwayUrl = 'https://library-backen-production.up.railway.app/api';
 
   static String get baseUrl {
-    if (_backendUrl != null && _backendUrl!.isNotEmpty) {
-      return _backendUrl!;
+    if (_railwayUrl != null && _railwayUrl!.isNotEmpty) {
+      return _railwayUrl!;
     }
 
     if (kIsWeb) {
