@@ -20,9 +20,8 @@ class _HomeScreenState extends State<HomeScreen> {
   int _currentCarousel = 0;
   final ScrollController _scrollController = ScrollController();
 
-  // 1. STATE KATEGORI
+  // DAFTAR KATEGORI (Tanpa "Semua" karena akan ditampilkan per section)
   final List<String> _categories = [
-    "Semua",
     "Teknologi",
     "Novel",
     "Bisnis",
@@ -30,13 +29,12 @@ class _HomeScreenState extends State<HomeScreen> {
     "Sejarah",
     "Desain",
   ];
-  String _selectedCategory = "Semua";
 
   // DEFINISI WARNA TEMA
-  final Color primaryColor = const Color(0xFF2563EB); // Modern Blue
-  final Color backgroundColor = const Color(0xFFF8FAFC); // Very Light Blue-Grey
-  final Color textPrimary = const Color(0xFF1E293B); // Slate 800
-  final Color textSecondary = const Color(0xFF64748B); // Slate 500
+  final Color primaryColor = const Color(0xFF2563EB);
+  final Color backgroundColor = const Color(0xFFF8FAFC);
+  final Color textPrimary = const Color(0xFF1E293B);
+  final Color textSecondary = const Color(0xFF64748B);
 
   @override
   void initState() {
@@ -52,20 +50,12 @@ class _HomeScreenState extends State<HomeScreen> {
     final auth = Provider.of<AuthProvider>(context);
     final library = Provider.of<LibraryProvider>(context);
 
-    // 2. LOGIKA FILTER BUKU
-    final filteredBooks = _selectedCategory == "Semua"
-        ? library.books
-        : library.books
-              .where((book) => book.category == _selectedCategory)
-              .toList();
-
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        surfaceTintColor:
-            Colors.transparent, // Mencegah perubahan warna saat scroll
+        surfaceTintColor: Colors.transparent,
         titleSpacing: 20,
         title: Row(
           children: [
@@ -116,166 +106,230 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        controller: _scrollController,
-        physics: const BouncingScrollPhysics(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // --- HEADER ---
-            _buildHeader(auth),
-
-            const SizedBox(height: 20),
-
-            // --- CAROUSEL (REKOMENDASI) ---
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
+      body: library.isLoading
+          ? Center(child: CircularProgressIndicator(color: primaryColor))
+          : SingleChildScrollView(
+              controller: _scrollController,
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.only(bottom: 40),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Rekomendasi',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: textPrimary,
+                  // --- HEADER ---
+                  _buildHeader(auth),
+
+                  const SizedBox(height: 20),
+
+                  // --- CAROUSEL (REKOMENDASI) ---
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Text(
+                      'Rekomendasi untukmu',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: textPrimary,
+                      ),
                     ),
                   ),
-                  const Spacer(),
-                  Icon(Icons.arrow_forward_ios, size: 14, color: textSecondary),
+                  const SizedBox(height: 16),
+                  _buildCarousel(library),
+
+                  const SizedBox(height: 10),
+
+                  // --- DAFTAR BUKU PER KATEGORI (LOOPING) ---
+                  // Kita melakukan looping untuk setiap kategori di daftar _categories
+                  ..._categories.map((category) {
+                    // Ambil buku sesuai kategori saat ini
+                    final booksByCategory = library.books
+                        .where((book) => book.category == category)
+                        .toList();
+
+                    // Jika tidak ada buku di kategori ini, jangan tampilkan section-nya
+                    if (booksByCategory.isEmpty) return const SizedBox.shrink();
+
+                    return _buildCategorySection(category, booksByCategory);
+                  }),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
-            _buildCarousel(library),
+    );
+  }
 
-            const SizedBox(height: 24),
-
-            // --- 3. CATEGORY SECTION ---
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: Text(
-                "Kategori Pilihan",
+  // --- WIDGET SECTION PER KATEGORI ---
+  Widget _buildCategorySection(String title, List<dynamic> books) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 24),
+        // Judul Kategori
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: textPrimary,
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-            _buildCategoryList(),
-
-            const SizedBox(height: 24),
-
-            // --- LIST BUKU SECTION ---
-            Container(
-              constraints: BoxConstraints(
-                minHeight: MediaQuery.of(context).size.height * 0.5,
+              InkWell(
+                onTap: () {
+                  // Aksi Lihat Semua (Opsional)
+                },
+                child: Text(
+                  "Lihat Semua",
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: primaryColor,
+                  ),
+                ),
               ),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        // List Horizontal
+        SizedBox(
+          height: 260, // Tinggi area scroll horizontal
+          child: ListView.separated(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            scrollDirection: Axis.horizontal, // Scroll Samping
+            physics: const BouncingScrollPhysics(),
+            itemCount: books.length,
+            separatorBuilder: (context, index) => const SizedBox(width: 16),
+            itemBuilder: (context, index) {
+              final book = books[index];
+              return SizedBox(
+                width: 150, // Lebar tetap untuk setiap kartu buku
+                child: _buildBookCard(context, book),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  // --- WIDGET KARTU BUKU (Vertical Card) ---
+  Widget _buildBookCard(BuildContext context, dynamic book) {
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => BookDetailScreen(book: book)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 1. Cover Image
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Color(0x0D000000),
-                    blurRadius: 20,
-                    offset: Offset(0, -5),
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
                   ),
                 ],
               ),
-              padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Jelajahi Buku',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: textPrimary,
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade100,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          '${filteredBooks.length} Buku',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: textSecondary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  library.isLoading
-                      ? Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(40.0),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Stack(
+                  children: [
+                    CachedNetworkImage(
+                      imageUrl: book.coverImage,
+                      width: double.infinity,
+                      height: double.infinity,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => Container(
+                        color: Colors.grey[200],
+                        child: Center(
                             child: CircularProgressIndicator(
-                              color: primaryColor,
-                            ),
-                          ),
-                        )
-                      : filteredBooks.isEmpty
-                      ? Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(40.0),
-                            child: Column(
-                              children: [
-                                Icon(
-                                  Icons.search_off_rounded,
-                                  size: 60,
-                                  color: Colors.grey[200],
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  "Buku tidak ditemukan",
-                                  style: TextStyle(color: textSecondary),
-                                ),
-                              ],
-                            ),
-                          ),
-                        )
-                      // PERUBAHAN DISINI: Menggunakan GridView
-                      : GridView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2, // 2 Kolom
-                                crossAxisSpacing: 16, // Jarak horizontal
-                                mainAxisSpacing: 20, // Jarak vertikal
-                                childAspectRatio:
-                                    0.60, // Rasio lebar:tinggi kartu (diatur agar pas)
-                              ),
-                          itemCount: filteredBooks.length,
-                          itemBuilder: (context, index) {
-                            final book = filteredBooks[index];
-                            return _buildBookCard(context, book);
-                          },
+                                strokeWidth: 2, color: primaryColor)),
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        color: Colors.grey[300],
+                        child: const Icon(Icons.broken_image, color: Colors.grey),
+                      ),
+                    ),
+                    // Status Badge (Available/Borrowed)
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 4,
+                            )
+                          ],
                         ),
-                ],
+                        child: Icon(
+                          book.status == 'Available'
+                              ? Icons.check_circle
+                              : Icons.access_time_filled,
+                          size: 14,
+                          color: book.status == 'Available'
+                              ? Colors.green
+                              : Colors.orange,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 10),
+          // 2. Info Buku
+          Text(
+            book.title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: textPrimary,
+              height: 1.2,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            book.author,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 12,
+              color: textSecondary,
+            ),
+          ),
+           const SizedBox(height: 4),
+           Row(
+             children: [
+                const Icon(Icons.star_rounded, size: 14, color: Colors.amber),
+                const SizedBox(width: 4),
+                Text(
+                  "4.8", 
+                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: textPrimary),
+                ),
+             ],
+           )
+        ],
       ),
     );
   }
 
-  // --- WIDGET HEADER (Improved) ---
+  // --- WIDGET HEADER ---
   Widget _buildHeader(AuthProvider auth) {
     return Container(
       color: Colors.white,
@@ -337,66 +391,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // --- WIDGET CATEGORY LIST (Pill Style) ---
-  Widget _buildCategoryList() {
-    return SizedBox(
-      height: 42,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        itemCount: _categories.length,
-        itemBuilder: (context, index) {
-          final category = _categories[index];
-          final isSelected = _selectedCategory == category;
-
-          return GestureDetector(
-            onTap: () {
-              setState(() {
-                _selectedCategory = category;
-              });
-            },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              margin: const EdgeInsets.only(right: 12),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-              decoration: BoxDecoration(
-                color: isSelected ? primaryColor : Colors.white,
-                borderRadius: BorderRadius.circular(100),
-                border: Border.all(
-                  color: isSelected ? primaryColor : Colors.grey.shade300,
-                  width: 1,
-                ),
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: primaryColor.withOpacity(0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
-                        ),
-                      ]
-                    : [],
-              ),
-              child: Center(
-                child: Text(
-                  category,
-                  style: TextStyle(
-                    color: isSelected ? Colors.white : textSecondary,
-                    fontWeight: isSelected
-                        ? FontWeight.w600
-                        : FontWeight.normal,
-                    fontSize: 13,
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  // --- WIDGET CAROUSEL (Improved Visuals) ---
+  // --- WIDGET CAROUSEL ---
   Widget _buildCarousel(LibraryProvider library) {
     if (library.books.isEmpty) {
       return const SizedBox(
@@ -413,14 +408,10 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  // Background Card
                   Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [
-                          primaryColor,
-                          const Color(0xFF1E40AF),
-                        ], // Blue gradient
+                        colors: [primaryColor, const Color(0xFF1E40AF)],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
@@ -434,7 +425,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                   ),
-                  // Background Decoration
                   Positioned(
                     right: -30,
                     top: -30,
@@ -451,8 +441,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       backgroundColor: Colors.white.withOpacity(0.08),
                     ),
                   ),
-
-                  // Content
                   Padding(
                     padding: const EdgeInsets.all(20.0),
                     child: Row(
@@ -473,7 +461,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: const Text(
-                                  "Editor's Choice",
+                                  "Pilihan Terpopuler",
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 10,
@@ -558,7 +546,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         const SizedBox(height: 12),
-        // Indicator
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: library.books.take(5).toList().asMap().entries.map((entry) {
@@ -575,209 +562,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             );
           }).toList(),
-        ),
-      ],
-    );
-  }
-
-  // --- WIDGET KARTU BUKU (Vertical & Clean Layout) ---
-  Widget _buildBookCard(BuildContext context, dynamic book) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.08),
-            spreadRadius: 2,
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => BookDetailScreen(book: book)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 1. Cover Image (Bagian Atas)
-              Expanded(
-                child: Stack(
-                  children: [
-                    Hero(
-                      tag: 'book-cover-${book.id ?? book.title}',
-                      child: Container(
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(16),
-                          ),
-                          color: Colors.grey[100],
-                        ),
-                        child: ClipRRect(
-                          borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(16),
-                          ),
-                          child: CachedNetworkImage(
-                            imageUrl: book.coverImage,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => Center(
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: primaryColor,
-                              ),
-                            ),
-                            errorWidget: (context, url, error) => const Center(
-                              child: Icon(
-                                Icons.broken_image,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    // Rating Badge (Overlay Pojok Kanan Atas)
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.6),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.star_rounded,
-                              size: 12,
-                              color: Colors.amber,
-                            ),
-                            const SizedBox(width: 4),
-                            const Text(
-                              "4.8",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // 2. Info Buku (Bagian Bawah)
-              Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Kategori
-                    Text(
-                      book.category.toUpperCase() ?? "UMUM",
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        color: primaryColor,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    // Judul
-                    Text(
-                      book.title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: textPrimary,
-                        height: 1.2,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    // Penulis
-                    Text(
-                      book.author,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontSize: 12, color: textSecondary),
-                    ),
-                    const SizedBox(height: 10),
-                    // Status Availability (Minimalis)
-                    Row(
-                      children: [
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: book.status == 'Available'
-                                ? Colors.green
-                                : Colors.orange,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          book.status == 'Available' ? "Tersedia" : "Dipinjam",
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            color: book.status == 'Available'
-                                ? Colors.green[700]
-                                : Colors.orange[800],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // --- WIDGET STATUS BADGE (Minimalis) ---
-
-  // ignore: unused_element
-  Widget _buildStatusBadge(String status) {
-    bool isAvailable = status == 'Available';
-    return Row(
-      children: [
-        Container(
-          width: 6,
-          height: 6,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: isAvailable ? Colors.green : Colors.orange,
-          ),
-        ),
-        const SizedBox(width: 6),
-        Text(
-          isAvailable ? "Tersedia" : "Dipinjam",
-          style: TextStyle(
-            color: isAvailable ? Colors.green[700] : Colors.orange[800],
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-          ),
         ),
       ],
     );

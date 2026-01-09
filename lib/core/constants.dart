@@ -1,23 +1,21 @@
 import 'package:flutter/foundation.dart';
 
 class AppConstants {
-  // GANTI URL INI dengan domain dari Railway, contoh: 'https://unilam-backend.up.railway.app/api'
-  // Jangan lupa tambahkan '/api' di belakangnya.
-  static const String? _railwayUrl = null; 
+  // GANTI URL INI dengan domain dari ngrok kamu
+  // Contoh: 'https://1234-56-789-012-345.ngrok-free.app/api' (URL ngrok yang diberikan)
+  // atau URL deployment backend kamu jika sudah di-deploy
+  static const String? _backendUrl = 'https://preborn-unpiteous-neriah.ngrok-free.dev/api'; // Ganti null dengan URL ngrok kamu
 
   static String get baseUrl {
-    if (_railwayUrl != null && _railwayUrl!.isNotEmpty) {
-      return _railwayUrl!;
+    if (_backendUrl != null && _backendUrl!.isNotEmpty) {
+      return _backendUrl!;
     }
 
     if (kIsWeb) {
       return 'http://127.0.0.1:8000/api';
-    } else if (defaultTargetPlatform == TargetPlatform.android) {
-      // JIKA PAKAI EMULATOR, GUNAKAN: 'http://10.0.2.2:8000/api'
-      // JIKA PAKAI HP FISIK, GANTI IP DI BAWAH INI SESUAI IP LAPTOP (Cth: 192.168.1.x)
-      return 'http://10.0.2.2:8000/api';
     } else {
-      return 'http://127.0.0.1:8000/api'; // iOS / Windows / macOS
+      // MENGGUNAKAN IP LAPTOP AGAR BISA DIAKSES DARI HP FISIK DI JARINGAN WIFI YANG SAMA
+      return 'http://10.122.125.138:8000/api';
     }
   }
 

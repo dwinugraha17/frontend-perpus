@@ -35,10 +35,14 @@ class AuthProvider with ChangeNotifier {
         _errorMessage = body['message'] ?? 'Login gagal. Cek email/password.';
       }
     } on TimeoutException {
-      _errorMessage = 'Koneksi timeout. Pastikan server berjalan dan IP benar.';
+      _errorMessage = 'Waktu koneksi habis. Cek apakah server dan HP di WiFi yang sama.';
     } catch (e) {
       debugPrint(e.toString());
-      _errorMessage = 'Gagal terhubung ke server. Cek koneksi internet.';
+      if (e.toString().contains('SocketException')) {
+        _errorMessage = 'Tidak dapat terhubung ke server. Pastikan IP laptop benar dan Firewall mati.';
+      } else {
+        _errorMessage = 'Terjadi kesalahan: $e';
+      }
     }
     _isLoading = false;
     notifyListeners();
@@ -85,7 +89,8 @@ class AuthProvider with ChangeNotifier {
       _errorMessage = 'Koneksi timeout. Pastikan server berjalan dan IP benar.';
     } catch (e) {
       debugPrint(e.toString());
-      _errorMessage = 'Gagal terhubung ke server. Cek koneksi internet.';
+      // TAMPILKAN ERROR ASLI
+      _errorMessage = 'Gagal konek: $e';
     }
     _isLoading = false;
     notifyListeners();
