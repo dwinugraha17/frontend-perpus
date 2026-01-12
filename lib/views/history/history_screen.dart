@@ -20,12 +20,47 @@ class _HistoryScreenState extends State<HistoryScreen> {
     });
   }
 
+  void _showReturnDialog(BuildContext context, String borrowingId) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Kembalikan Buku?'),
+        content: const Text('Apakah Anda yakin ingin mengembalikan buku ini?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Batal', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context); // Close dialog first
+              final success = await Provider.of<LibraryProvider>(context, listen: false)
+                  .returnBook(borrowingId);
+              
+              if (mounted) {
+                // ignore: use_build_context_synchronously
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(success ? 'Buku berhasil dikembalikan' : 'Gagal mengembalikan buku'),
+                    backgroundColor: success ? Colors.green : Colors.red,
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+            child: const Text('Kembalikan', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final library = Provider.of<LibraryProvider>(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC), // Slate 50
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.transparent,
@@ -34,7 +69,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
         title: const Text(
           'Riwayat Peminjaman',
           style: TextStyle(
-            color: Color(0xFF1E293B), // Slate 800
+            color: Color(0xFF1E293B),
             fontWeight: FontWeight.w800,
             fontSize: 20,
           ),
@@ -57,6 +92,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Widget _buildHistoryCard(dynamic item) {
+    final bool isBorrowed = item.status.toLowerCase() == 'borrowed';
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -97,7 +134,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF1E293B), // Slate 800
+                        color: Color(0xFF1E293B),
                         height: 1.2,
                       ),
                     ),
@@ -119,6 +156,23 @@ class _HistoryScreenState extends State<HistoryScreen> {
               _buildDateColumn('Dikembalikan', item.returnDate),
             ],
           ),
+          // Return Button
+          if (isBorrowed) ...[
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => _showReturnDialog(context, item.id),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue.shade50,
+                  foregroundColor: Colors.blue.shade700,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                child: const Text('Kembalikan Buku'),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -132,7 +186,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           label,
           style: const TextStyle(
             fontSize: 12,
-            color: Color(0xFF64748B), // Slate 500
+            color: Color(0xFF64748B),
           ),
         ),
         const SizedBox(height: 4),
@@ -145,7 +199,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF334155), // Slate 700
+                color: Color(0xFF334155),
               ),
             ),
           ],
@@ -159,27 +213,24 @@ class _HistoryScreenState extends State<HistoryScreen> {
     Color bgColor;
     String label;
     IconData icon;
+    String statusLower = status.toLowerCase();
 
-    switch (status) {
-      case 'Borrowed':
+    if (statusLower == 'borrowed') {
         color = const Color(0xFF2563EB); // Blue
         bgColor = const Color(0xFFEFF6FF); // Blue 50
         label = 'Sedang Dipinjam';
         icon = Icons.timer_outlined;
-        break;
-      case 'Returned':
+    } else if (statusLower == 'returned') {
         color = const Color(0xFF16A34A); // Green
         bgColor = const Color(0xFFF0FDF4); // Green 50
         label = 'Dikembalikan';
         icon = Icons.check_circle_outline;
-        break;
-      case 'Late':
+    } else if (statusLower == 'late') {
         color = const Color(0xFFDC2626); // Red
         bgColor = const Color(0xFFFEF2F2); // Red 50
         label = 'Terlambat';
         icon = Icons.warning_amber_rounded;
-        break;
-      default:
+    } else {
         color = const Color(0xFF64748B); // Slate
         bgColor = const Color(0xFFF1F5F9); // Slate 100
         label = status;

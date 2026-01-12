@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:unilam_library/providers/library_provider.dart';
 import 'package:unilam_library/views/detail/book_detail_screen.dart';
+import 'package:unilam_library/views/widgets/custom_network_image.dart';
 
 class BooksScreen extends StatefulWidget {
   const BooksScreen({super.key});
@@ -224,14 +224,14 @@ class _BooksScreenState extends State<BooksScreen> {
                     borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                     child: Hero(
                       tag: 'book-cover-${book.id ?? book.title}',
-                      child: CachedNetworkImage(
+                      child: CustomNetworkImage(
                         imageUrl: book.coverImage,
                         fit: BoxFit.cover,
-                        placeholder: (context, url) => Container(
+                        placeholder: Container(
                           color: Colors.grey[100],
                           child: const Center(child: Icon(Icons.image, color: Colors.grey)),
                         ),
-                        errorWidget: (context, url, error) => Container(
+                        errorWidget: Container(
                           color: Colors.grey[200],
                           child: const Center(child: Icon(Icons.broken_image, color: Colors.grey)),
                         ),

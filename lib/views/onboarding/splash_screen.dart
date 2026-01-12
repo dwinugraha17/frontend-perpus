@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+// GANTI IMPORT DI BAWAH INI DENGAN PUNYA KAMU
 import 'package:unilam_library/views/auth/login_screen.dart';
 import 'package:unilam_library/views/main_wrapper.dart';
 
@@ -10,36 +11,46 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
   @override
   void initState() {
     super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1500),
+    );
+
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutBack, // Ini efek membesar yang smooth
+    );
+
+    _controller.forward();
     _navigateToNextScreen();
   }
 
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   Future<void> _navigateToNextScreen() async {
-    await Future.delayed(const Duration(seconds: 2)); // Show splash for 2 seconds
+    await Future.delayed(const Duration(seconds: 3));
+    if (!mounted) return;
 
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('auth_token');
-    final hasSeenOnboarding = prefs.getBool('has_seen_onboarding') ?? false;
 
-    // Navigate based on auth state and onboarding status
-    Widget nextScreen;
-    if (token != null) {
-      // User is logged in, go directly to main wrapper
-      nextScreen = const MainWrapper();
-    } else if (hasSeenOnboarding) {
-      // User has seen onboarding, go to login
-      nextScreen = const LoginScreen();
-    } else {
-      // Show onboarding first
-      nextScreen = const LoginScreen();
-    }
+    Widget nextScreen = (token != null) ? const MainWrapper() : const LoginScreen();
 
     if (mounted) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => nextScreen),
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => nextScreen),
       );
     }
   }
@@ -47,47 +58,32 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF2563EB), // Primary blue color
+      backgroundColor: const Color(0xFF2563EB),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Logo/Icon
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Icon(
-                Icons.local_library_rounded,
-                size: 100,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(height: 32),
-            // App Name
-            Text(
-              'UNILAM Library',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                shadows: [
-                  Shadow(
-                    color: Colors.black.withValues(alpha: 0.3),
-                    blurRadius: 5,
-                    offset: const Offset(1, 1),
+        child: ScaleTransition( // Animasi membesar
+          scale: _animation,
+          child: FadeTransition( // Animasi muncul perlahan
+            opacity: _animation,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    // ignore: deprecated_member_use
+                    color: Colors.white.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                ],
-              ),
+                  child: const Icon(Icons.local_library_rounded, size: 80, color: Colors.white),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  'UNILAM Library',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            // Loading indicator
-            const CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-            ),
-          ],
+          ),
         ),
       ),
     );

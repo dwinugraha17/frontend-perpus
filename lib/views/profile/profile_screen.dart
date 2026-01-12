@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:unilam_library/providers/auth_provider.dart';
 import 'package:unilam_library/providers/settings_provider.dart';
 import 'package:unilam_library/views/auth/login_screen.dart';
 import 'package:unilam_library/views/profile/edit_profile_screen.dart';
+import 'package:unilam_library/views/widgets/custom_network_image.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -73,15 +73,14 @@ class ProfileScreen extends StatelessWidget {
                     ),
                     child: ClipOval(
                       child: user?.profilePhoto != null
-                          ? CachedNetworkImage(
-                              key: ValueKey(user!.profilePhoto!),
-                              imageUrl: user.profilePhoto!,
+                          ? CustomNetworkImage(
+                              imageUrl: user!.profilePhoto!,
                               fit: BoxFit.cover,
-                              placeholder: (context, url) => Container(
+                              placeholder: Container(
                                 color: isDark ? Colors.grey[800] : Colors.grey[100],
                                 child: const Center(child: CircularProgressIndicator()),
                               ),
-                              errorWidget: (context, url, error) => Container(
+                              errorWidget: Container(
                                 color: isDark ? Colors.grey[800] : Colors.grey[100],
                                 child: Icon(Icons.person, size: 48, color: Colors.grey[400]),
                               ),

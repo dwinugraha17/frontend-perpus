@@ -15,8 +15,6 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  
-  // 1. Tambahkan variabel untuk mengontrol visibilitas password
   bool _obscurePassword = true;
 
   void _login() async {
@@ -24,7 +22,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final success = await auth.login(_emailController.text, _passwordController.text);
     if (!mounted) return;
     if (success) {
-      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => MainWrapper()));
+      Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const MainWrapper()));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -49,7 +47,7 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // --- BAGIAN LOGO / HEADER ---
+                // --- LOGO ---
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -78,10 +76,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 48),
 
-                // --- BAGIAN FORM ---
+                // --- EMAIL FIELD ---
                 TextField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
+                  // Teks yang diketik akan berwarna hitam
+                  style: const TextStyle(color: Colors.black), 
                   decoration: InputDecoration(
                     labelText: 'Email',
                     hintText: 'user@unilam.ac.id',
@@ -104,15 +104,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 20),
 
-                // Password Field
+                // --- PASSWORD FIELD ---
                 TextField(
                   controller: _passwordController,
-                  // 2. Gunakan variabel _obscurePassword di sini
-                  obscureText: _obscurePassword, 
+                  obscureText: _obscurePassword,
+                  // Teks yang diketik akan berwarna hitam
+                  style: const TextStyle(color: Colors.black), 
                   decoration: InputDecoration(
                     labelText: 'Password',
                     prefixIcon: Icon(Icons.lock_outline, color: primaryColor),
-                    // 3. Tambahkan suffixIcon untuk tombol toggle
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscurePassword 
@@ -121,7 +121,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         color: Colors.grey,
                       ),
                       onPressed: () {
-                        // 4. Ubah state saat tombol ditekan
                         setState(() {
                           _obscurePassword = !_obscurePassword;
                         });
@@ -145,7 +144,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 32),
 
-                // --- BAGIAN TOMBOL ---
+                // --- BUTTON LOGIN ---
                 Consumer<AuthProvider>(
                   builder: (context, auth, _) => auth.isLoading
                       ? CircularProgressIndicator(color: primaryColor)

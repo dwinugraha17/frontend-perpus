@@ -1,20 +1,41 @@
 import 'package:flutter/foundation.dart';
 
 class AppConstants {
-  // GANTI URL INI dengan domain dari Railway deployment kamu
-  static const String? _railwayUrl = 'https://library-backen-production.up.railway.app/api';
+  // 1. UBAH KE 'false' jika ingin pakai Localhost, 'true' jika ingin pakai Railway
+  static const bool _isProduction = false;
+
+  // 2. JIKA PAKAI HP FISIK: Isi dengan IP Laptop (misal '192.168.1.10').
+  //    JIKA PAKAI EMULATOR / WEB / WINDOWS APP: Biarkan kosong ''.
+  static const String _physicalDeviceIp = '192.168.68.102'; 
+
+  static const String _railwayUrl = 'https://library-backen-production.up.railway.app/api';
 
   static String get baseUrl {
-    if (_railwayUrl != null && _railwayUrl!.isNotEmpty) {
-      return _railwayUrl!;
+    // A. Mode Production (Railway)
+    if (_isProduction) {
+      return _railwayUrl;
     }
 
+    // B. Mode Development (Localhost)
+    
+    // 1. Jika Web (Prioritas utama untuk development di browser)
     if (kIsWeb) {
       return 'http://127.0.0.1:8000/api';
-    } else {
-      // MENGGUNAKAN IP LAPTOP AGAR BISA DIAKSES DARI HP FISIK DI JARINGAN WIFI YANG SAMA
-      return 'http://10.122.125.138:8000/api';
     }
+
+    // 2. Jika ada IP Fisik yang diset manual
+    if (_physicalDeviceIp.isNotEmpty) {
+      return 'http://$_physicalDeviceIp:8000/api';
+    }
+
+    // 3. Jika Android (Emulator standar)
+    
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      return 'http://10.0.2.2:8000/api';
+    }
+
+    // 4. iOS Simulator, Windows App, macOS App, Linux App
+    return 'http://127.0.0.1:8000/api';
   }
 
   static const String appName = 'UNILAM Library';

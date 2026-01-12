@@ -5,8 +5,8 @@ import 'package:flutter/foundation.dart'; // Untuk kIsWeb
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:unilam_library/providers/auth_provider.dart';
+import 'package:unilam_library/views/widgets/custom_network_image.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -110,18 +110,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final inputFillColor = isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9); // Slate 700 / Slate 100
     final textSecondary = isDark ? Colors.grey[400]! : const Color(0xFF64748B);
 
-    // Logika Tampilan Gambar
-    ImageProvider? backgroundImage;
-    if (_imageFile != null) {
-      if (kIsWeb) {
-        backgroundImage = NetworkImage(_imageFile!.path);
-      } else {
-        backgroundImage = FileImage(File(_imageFile!.path));
-      }
-    } else if (user?.profilePhoto != null) {
-      backgroundImage = CachedNetworkImageProvider(user!.profilePhoto!);
-    }
-
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
@@ -150,6 +138,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           child: Column(
             children: [
               const SizedBox(height: 20),
+
+// ... (existing imports)
+
+  // ... inside build method
+  
               // --- BAGIAN FOTO PROFIL ---
               Center(
                 child: Stack(
@@ -167,13 +160,35 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           ),
                         ],
                       ),
-                      child: CircleAvatar(
-                        radius: 65,
-                        backgroundColor: inputFillColor,
-                        backgroundImage: backgroundImage,
-                        child: (backgroundImage == null)
-                            ? Icon(Icons.person, size: 60, color: textSecondary)
-                            : null,
+                      // REPLACE CircleAvatar with ClipOval logic
+                      child: ClipOval(
+                        child: SizedBox(
+                          width: 130, // 2 * radius 65
+                          height: 130,
+                          child: _imageFile != null
+                              ? (kIsWeb 
+                                  ? Image.network(_imageFile!.path, fit: BoxFit.cover) 
+                                  : Image.file(File(_imageFile!.path), fit: BoxFit.cover))
+                              : (user?.profilePhoto != null
+                                  ? CustomNetworkImage(
+                                      imageUrl: user!.profilePhoto!,
+                                      fit: BoxFit.cover,
+                                      width: 130,
+                                      height: 130,
+                                      placeholder: Container(
+                                        color: inputFillColor,
+                                        child: const Center(child: CircularProgressIndicator()),
+                                      ),
+                                      errorWidget: Container(
+                                        color: inputFillColor,
+                                        child: Icon(Icons.person, size: 60, color: textSecondary),
+                                      ),
+                                    )
+                                  : Container(
+                                      color: inputFillColor,
+                                      child: Icon(Icons.person, size: 60, color: textSecondary),
+                                    )),
+                        ),
                       ),
                     ),
                     // Tombol Kamera Kecil
@@ -204,6 +219,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ),
               ),
               const SizedBox(height: 16),
+  // ...
               Text(
                 'Ketuk ikon kamera untuk mengganti foto', 
                 style: TextStyle(color: textSecondary, fontSize: 13),

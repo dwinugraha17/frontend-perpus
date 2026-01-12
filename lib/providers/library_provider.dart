@@ -59,4 +59,43 @@ class LibraryProvider with ChangeNotifier {
       return false;
     }
   }
+
+  Future<BookModel?> getBookDetail(String bookId) async {
+    try {
+      final response = await _apiService.get('/books/$bookId');
+      if (response.statusCode == 200) {
+        return BookModel.fromJson(jsonDecode(response.body));
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+    return null;
+  }
+
+  Future<bool> addReview(String bookId, int rating, String comment) async {
+    try {
+      final response = await _apiService.post('/books/$bookId/reviews', {
+        'rating': rating,
+        'comment': comment,
+      });
+      return response.statusCode == 201;
+    } catch (e) {
+      debugPrint(e.toString());
+      return false;
+    }
+  }
+
+  Future<bool> returnBook(String borrowingId) async {
+    try {
+      final response = await _apiService.post('/return/$borrowingId', {});
+      if (response.statusCode == 200) {
+        await fetchHistory(); // Refresh history list
+        return true;
+      }
+      return false;
+    } catch (e) {
+      debugPrint(e.toString());
+      return false;
+    }
+  }
 }

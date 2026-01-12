@@ -1,5 +1,6 @@
 // ignore_for_file: deprecated_member_use
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -7,6 +8,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:unilam_library/providers/auth_provider.dart';
 import 'package:unilam_library/providers/library_provider.dart';
 import 'package:unilam_library/views/detail/book_detail_screen.dart';
+import 'package:unilam_library/views/widgets/custom_network_image.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -96,7 +98,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 radius: 16,
                 backgroundColor: Colors.grey[200],
                 backgroundImage: auth.user?.profilePhoto != null
-                    ? CachedNetworkImageProvider(auth.user!.profilePhoto!)
+                    ? (kIsWeb
+                        ? NetworkImage(auth.user!.profilePhoto!)
+                        : CachedNetworkImageProvider(auth.user!.profilePhoto!)) as ImageProvider
                     : null,
                 child: auth.user?.profilePhoto == null
                     ? Icon(Icons.person, color: Colors.grey[400], size: 20)
@@ -242,18 +246,18 @@ class _HomeScreenState extends State<HomeScreen> {
                 borderRadius: BorderRadius.circular(12),
                 child: Stack(
                   children: [
-                    CachedNetworkImage(
+                    CustomNetworkImage(
                       imageUrl: book.coverImage,
                       width: double.infinity,
                       height: double.infinity,
                       fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(
+                      placeholder: Container(
                         color: Colors.grey[200],
                         child: Center(
                             child: CircularProgressIndicator(
                                 strokeWidth: 2, color: primaryColor)),
                       ),
-                      errorWidget: (context, url, error) => Container(
+                      errorWidget: Container(
                         color: Colors.grey[300],
                         child: const Icon(Icons.broken_image, color: Colors.grey),
                       ),
@@ -512,15 +516,14 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(8),
-                                child: CachedNetworkImage(
+                                child: CustomNetworkImage(
                                   imageUrl: book.coverImage,
                                   fit: BoxFit.cover,
                                   height: 110,
-                                  placeholder: (context, url) => Container(
+                                  placeholder: Container(
                                     color: Colors.white.withOpacity(0.2),
                                   ),
-                                  errorWidget: (context, url, error) =>
-                                      Container(
+                                  errorWidget: Container(
                                         color: Colors.grey,
                                         child: const Icon(Icons.book),
                                       ),

@@ -1,17 +1,52 @@
-import 'dart:ui'; // Diperlukan untuk ImageFilter (Blur)
+import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:provider/provider.dart';
 import 'package:unilam_library/models/book_model.dart';
+import 'package:unilam_library/models/review_model.dart';
 import 'package:unilam_library/providers/library_provider.dart';
 import 'package:unilam_library/views/detail/pdf_viewer_screen.dart';
+import 'package:unilam_library/views/widgets/custom_network_image.dart';
 
-class BookDetailScreen extends StatelessWidget {
+class BookDetailScreen extends StatefulWidget {
   final BookModel book;
 
   const BookDetailScreen({super.key, required this.book});
 
-  // Helper untuk format tanggal sederhana (dd/mm/yyyy)
+  @override
+  State<BookDetailScreen> createState() => _BookDetailScreenState();
+}
+
+class _BookDetailScreenState extends State<BookDetailScreen> {
+  late BookModel _book;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _book = widget.book;
+    _fetchBookDetail();
+  }
+
+  Future<void> _fetchBookDetail() async {
+    setState(() => _isLoading = true);
+    final updatedBook = await Provider.of<LibraryProvider>(context, listen: false)
+        .getBookDetail(widget.book.id);
+    
+    if (mounted) {
+      if (updatedBook != null) {
+        setState(() {
+          _book = updatedBook;
+        });
+      } else {
+        // Optional: Show error if fetch fails (e.g. connectivity)
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   SnackBar(content: Text("Gagal memuat ulasan terbaru."))
+        // );
+      }
+      setState(() => _isLoading = false);
+    }
+  }
+
   String _formatDate(DateTime date) {
     return "${date.day}/${date.month}/${date.year}";
   }
@@ -36,17 +71,17 @@ class BookDetailScreen extends StatelessWidget {
               ),
               SizedBox(height: 20),
               _buildDateSelector(
-                context, 
-                "Tanggal Pinjam", 
-                borrowDate, 
+                context,
+                "Tanggal Pinjam",
+                borrowDate,
                 (date) => setState(() => borrowDate = date),
                 minDate: DateTime.now(),
               ),
               SizedBox(height: 12),
               _buildDateSelector(
-                context, 
-                "Tanggal Kembali", 
-                returnDate, 
+                context,
+                "Tanggal Kembali",
+                returnDate,
                 (date) => setState(() => returnDate = date),
                 minDate: borrowDate.add(Duration(days: 1)),
               ),
@@ -61,7 +96,7 @@ class BookDetailScreen extends StatelessWidget {
             ElevatedButton(
               onPressed: () async {
                 final success = await Provider.of<LibraryProvider>(context, listen: false)
-                    .borrowBook(book.id, borrowDate, returnDate);
+                    .borrowBook(_book.id, borrowDate, returnDate);
                 if (!context.mounted) return;
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -84,7 +119,78 @@ class BookDetailScreen extends StatelessWidget {
     );
   }
 
-  // Widget Helper untuk Picker Tanggal
+  void _showReviewDialog() {
+    int rating = 5;
+    final commentController = TextEditingController();
+    final primaryColor = Colors.blue.shade700;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text('Tulis Ulasan', style: TextStyle(fontWeight: FontWeight.bold)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(5, (index) {
+                  return IconButton(
+                    icon: Icon(
+                      index < rating ? Icons.star : Icons.star_border,
+                      color: Colors.amber,
+                      size: 32,
+                    ),
+                    onPressed: () => setState(() => rating = index + 1),
+                  );
+                }),
+              ),
+              TextField(
+                controller: commentController,
+                decoration: InputDecoration(
+                  hintText: 'Tulis komentar Anda (opsional)',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  contentPadding: EdgeInsets.all(12),
+                ),
+                maxLines: 3,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Batal', style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final success = await Provider.of<LibraryProvider>(context, listen: false)
+                    .addReview(_book.id, rating, commentController.text);
+                if (!context.mounted) return;
+                Navigator.pop(context);
+                if (success) {
+                  _fetchBookDetail(); // Refresh details
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Ulasan berhasil dikirim!'), backgroundColor: Colors.green),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Gagal mengirim ulasan (mungkin sudah pernah?)'), backgroundColor: Colors.red),
+                  );
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryColor,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              child: Text('Kirim', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildDateSelector(BuildContext context, String label, DateTime selectedDate, Function(DateTime) onSelect, {required DateTime minDate}) {
     return InkWell(
       onTap: () async {
@@ -123,14 +229,13 @@ class BookDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primaryColor = Colors.blue.shade700;
-    
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
         children: [
           CustomScrollView(
             slivers: [
-              // --- APP BAR & IMAGE SECTION ---
               SliverAppBar(
                 expandedHeight: 400,
                 pinned: true,
@@ -148,21 +253,18 @@ class BookDetailScreen extends StatelessWidget {
                   background: Stack(
                     fit: StackFit.expand,
                     children: [
-                      // 1. Blurred Background Image
-                      CachedNetworkImage(
-                        imageUrl: book.coverImage,
+                      CustomNetworkImage(
+                        imageUrl: _book.coverImage,
                         fit: BoxFit.cover,
                       ),
-                      // 2. Blur Effect Overlay
                       BackdropFilter(
                         filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                         // ignore: deprecated_member_use
                         child: Container(color: Colors.black.withOpacity(0.4)),
                       ),
-                      // 3. Main Book Cover (Centered)
                       Center(
                         child: Hero(
-                          tag: 'book-cover-${book.id}', // Tag harus sama dengan BooksScreen
+                          tag: 'book-cover-${_book.id}',
                           child: Container(
                             height: 220,
                             width: 150,
@@ -174,8 +276,8 @@ class BookDetailScreen extends StatelessWidget {
                             ),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(12),
-                              child: CachedNetworkImage(
-                                imageUrl: book.coverImage,
+                              child: CustomNetworkImage(
+                                imageUrl: _book.coverImage,
                                 fit: BoxFit.cover,
                               ),
                             ),
@@ -187,19 +289,17 @@ class BookDetailScreen extends StatelessWidget {
                 ),
               ),
 
-              // --- CONTENT SECTION ---
               SliverToBoxAdapter(
                 child: Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
                   ),
-                  transform: Matrix4.translationValues(0, -20, 0), // Overlap sedikit ke atas
+                  transform: Matrix4.translationValues(0, -20, 0),
                   padding: EdgeInsets.all(24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Judul & Penulis
                       Center(
                         child: Column(
                           children: [
@@ -209,13 +309,13 @@ class BookDetailScreen extends StatelessWidget {
                               margin: EdgeInsets.only(bottom: 20),
                             ),
                             Text(
-                              book.title,
+                              _book.title,
                               textAlign: TextAlign.center,
                               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black87),
                             ),
                             SizedBox(height: 8),
                             Text(
-                              book.author,
+                              _book.author,
                               textAlign: TextAlign.center,
                               style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                             ),
@@ -224,28 +324,48 @@ class BookDetailScreen extends StatelessWidget {
                       ),
                       SizedBox(height: 24),
 
-                      // Status Badge & Info
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          _buildInfoChip(Icons.star, "4.5 Rating", Colors.amber),
+                          _buildInfoChip(
+                            Icons.star, 
+                            "${_book.averageRating.toStringAsFixed(1)} Rating", 
+                            Colors.amber
+                          ),
                           SizedBox(width: 12),
                           _buildInfoChip(
-                            Icons.check_circle, 
-                            book.status, 
-                            book.status == 'Available' ? Colors.green : Colors.orange
+                            Icons.check_circle,
+                            _book.status,
+                            _book.status == 'Available' ? Colors.green : Colors.orange
                           ),
                         ],
                       ),
-                      
+
                       SizedBox(height: 32),
                       Text("Deskripsi", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                       SizedBox(height: 12),
                       Text(
-                        book.description,
+                        _book.description,
                         style: TextStyle(fontSize: 15, height: 1.6, color: Colors.grey[800]),
                       ),
-                      SizedBox(height: 100), // Space agar konten tidak tertutup tombol bawah
+                      
+                      SizedBox(height: 32),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text("Ulasan Pembaca", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          TextButton(
+                            onPressed: _showReviewDialog,
+                            child: Text("Tulis Ulasan"),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 12),
+                      _isLoading && _book.reviews.isEmpty 
+                          ? Center(child: CircularProgressIndicator())
+                          : _buildReviewsList(),
+
+                      SizedBox(height: 100),
                     ],
                   ),
                 ),
@@ -253,7 +373,6 @@ class BookDetailScreen extends StatelessWidget {
             ],
           ),
 
-          // --- BOTTOM ACTION BAR ---
           Positioned(
             bottom: 0,
             left: 0,
@@ -268,13 +387,12 @@ class BookDetailScreen extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  // Tombol Baca (Primary)
                   Expanded(
                     flex: 1,
                     child: ElevatedButton(
-                      onPressed: book.pdfUrl != null
+                      onPressed: _book.pdfUrl != null
                           ? () => Navigator.push(context,
-                              MaterialPageRoute(builder: (_) => PdfViewerScreen(url: book.pdfUrl!, title: book.title)))
+                              MaterialPageRoute(builder: (_) => PdfViewerScreen(url: _book.pdfUrl!, title: _book.title)))
                           : null,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
@@ -288,11 +406,10 @@ class BookDetailScreen extends StatelessWidget {
                     ),
                   ),
                   SizedBox(width: 16),
-                  // Tombol Pinjam (Accent)
                   Expanded(
                     flex: 1,
                     child: ElevatedButton(
-                      onPressed: book.status == 'Available' ? () => _showBorrowDialog(context) : null,
+                      onPressed: _book.status == 'Available' ? () => _showBorrowDialog(context) : null,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: primaryColor,
                         foregroundColor: Colors.white,
@@ -307,6 +424,75 @@ class BookDetailScreen extends StatelessWidget {
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReviewsList() {
+    if (_book.reviews.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text("Belum ada ulasan.", style: TextStyle(color: Colors.grey)),
+        ),
+      );
+    }
+    return Column(
+      children: _book.reviews.map((review) => _buildReviewItem(review)).toList(),
+    );
+  }
+
+  Widget _buildReviewItem(ReviewModel review) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 16,
+                backgroundImage: review.userPhoto != null 
+                    ? NetworkImage(review.userPhoto!) 
+                    : null,
+                child: review.userPhoto == null 
+                    ? Icon(Icons.person, size: 20) 
+                    : null,
+              ),
+              SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(review.userName, style: TextStyle(fontWeight: FontWeight.bold)),
+                    Row(
+                      children: List.generate(5, (index) {
+                        return Icon(
+                          index < review.rating ? Icons.star : Icons.star_border,
+                          size: 14,
+                          color: Colors.amber,
+                        );
+                      }),
+                    )
+                  ],
+                ),
+              ),
+              Text(
+                _formatDate(review.createdAt),
+                style: TextStyle(fontSize: 10, color: Colors.grey),
+              ),
+            ],
+          ),
+          if (review.comment != null && review.comment!.isNotEmpty) ...[
+            SizedBox(height: 8),
+            Text(review.comment!, style: TextStyle(fontSize: 13, color: Colors.grey.shade800)),
+          ]
         ],
       ),
     );
