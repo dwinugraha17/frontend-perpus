@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 
 class AppConstants {
   // 1. UBAH KE 'false' jika ingin pakai Localhost, 'true' jika ingin pakai Railway
-  static const bool _isProduction = false;
+  static const bool _isProduction = true;
 
   // 2. JIKA PAKAI HP FISIK: Isi dengan IP Laptop (misal '192.168.1.10').
   //    JIKA PAKAI EMULATOR / WEB / WINDOWS APP: Biarkan kosong ''.
