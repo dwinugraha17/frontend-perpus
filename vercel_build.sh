@@ -41,7 +41,7 @@ flutter pub get
 # 7. Build
 echo "--- Building Web App ---"
 # Menggunakan command build standar tanpa flag eksperimental untuk stabilitas
-flutter build web --release --web-renderer html
+flutter build web --release
 
 # 8. Check Output
 if [ ! -d "build/web" ]; then
