@@ -11,7 +11,9 @@ class AppConstants {
 
   static String get baseUrl {
     // A. Mode Production (Railway)
-  
+    if (kReleaseMode) {
+      return 'https://library-backen-production.up.railway.app/api';
+    }
 
     // B. Mode Development (Localhost)
     
