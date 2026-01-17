@@ -14,11 +14,19 @@ class LibraryProvider with ChangeNotifier {
   List<BorrowModel> get history => _history;
   bool get isLoading => _isLoading;
 
-  Future<void> fetchBooks() async {
+  Future<void> fetchBooks({String search = '', String category = 'Semua'}) async {
     _isLoading = true;
     notifyListeners();
     try {
-      final response = await _apiService.get('/books');
+      final queryParams = <String, String>{};
+      if (search.isNotEmpty) {
+        queryParams['search'] = search;
+      }
+      if (category != 'Semua') {
+        queryParams['category'] = category;
+      }
+
+      final response = await _apiService.get('/books', queryParams: queryParams);
       if (response.statusCode == 200) {
         final List data = jsonDecode(response.body);
         _books = data.map((json) => BookModel.fromJson(json)).toList();

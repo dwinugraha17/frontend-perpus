@@ -1,3 +1,6 @@
+// ignore_for_file: deprecated_member_use
+
+import 'package:barcode_widget/barcode_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:unilam_library/providers/auth_provider.dart';
@@ -23,6 +26,8 @@ class ProfileScreen extends StatelessWidget {
     final textSecondary = isDark ? Colors.grey[400]! : const Color(0xFF64748B);
     final cardColor = isDark ? const Color(0xFF1E293B) : Colors.white;
 
+    final hasValidPhoto = user?.profilePhoto != null && user!.profilePhoto!.isNotEmpty;
+
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
@@ -45,78 +50,141 @@ class ProfileScreen extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
         child: Column(
           children: [
-            // --- HEADER SECTION (CARD) ---
+            // --- MEMBER CARD ---
             Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: cardColor,
+                color: primaryColor,
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
+                    color: primaryColor.withOpacity(0.3),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   ),
                 ],
               ),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Avatar with Border
-                  Container(
-                    width: 100,
-                    height: 100,
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: primaryColor.withValues(alpha: 0.2), width: 2),
-                    ),
-                    child: ClipOval(
-                      child: user?.profilePhoto != null
-                          ? CustomNetworkImage(
-                              imageUrl: user!.profilePhoto!,
-                              fit: BoxFit.cover,
-                              placeholder: Container(
-                                color: isDark ? Colors.grey[800] : Colors.grey[100],
-                                child: const Center(child: CircularProgressIndicator()),
+                  const Row(
+                    children: [
+                      Icon(Icons.menu_book_rounded, color: Colors.white, size: 20),
+                      SizedBox(width: 8),
+                      Text(
+                        'UNILAM LIBRARY CARD',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      // Photo
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white.withOpacity(0.5), width: 2),
+                        ),
+                        child: ClipOval(
+                          child: hasValidPhoto
+                              ? CustomNetworkImage(
+                                  imageUrl: user.profilePhoto!,
+                                  fit: BoxFit.cover,
+                                )
+                              : Container(
+                                  color: Colors.white.withOpacity(0.2),
+                                  child: const Icon(Icons.person, size: 40, color: Colors.white),
+                                ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      // User Info
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              user?.name ?? 'Guest',
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
                               ),
-                              errorWidget: Container(
-                                color: isDark ? Colors.grey[800] : Colors.grey[100],
-                                child: Icon(Icons.person, size: 48, color: Colors.grey[400]),
-                              ),
-                            )
-                          : Container(
-                              color: isDark ? Colors.grey[800] : Colors.grey[100],
-                              child: Icon(Icons.person, size: 48, color: Colors.grey[400]),
                             ),
-                    ),
+                            const SizedBox(height: 4),
+                            Text(
+                              user?.email ?? 'No Email',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.white.withOpacity(0.8),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    user?.name ?? 'Guest',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 20),
+                  // Barcode
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: primaryColor.withValues(alpha: 0.08),
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Text(
-                      user?.email ?? 'No Email',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: primaryColor,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    child: Row(
+                      children: [
+                         Expanded(
+                           child: Column(
+                             crossAxisAlignment: CrossAxisAlignment.start,
+                             children: [
+                               Text(
+                                'MEMBER ID',
+                                style: TextStyle(
+                                  color: textSecondary,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                               Text(
+                                user?.id.toString() ?? 'N/A',
+                                style: TextStyle(
+                                  color: textPrimary,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 2,
+                                ),
+                              )
+                             ],
+                           ),
+                         ),
+                        Container(
+                          width: 60,
+                          height: 60,
+                          padding: const EdgeInsets.all(4),
+                           decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: BarcodeWidget(
+                            barcode: Barcode.qrCode(),
+                            data: user?.id.toString() ?? 'unilam-library-user',
+                            color: const Color(0xFF1E293B),
+                            padding: EdgeInsets.zero,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
+                  )
                 ],
               ),
             ),
@@ -132,7 +200,7 @@ class ProfileScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.02),
+                    color: Colors.black.withOpacity(0.02),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -164,7 +232,7 @@ class ProfileScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.02),
+                    color: Colors.black.withOpacity(0.02),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -187,62 +255,6 @@ class ProfileScreen extends StatelessWidget {
 
             const SizedBox(height: 32),
 
-            // --- SECTION NOTIFIKASI ---
-            _buildSectionHeader("Notifikasi", textSecondary),
-            const SizedBox(height: 12),
-            Container(
-              decoration: BoxDecoration(
-                color: cardColor,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.02),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  _buildSwitchTile(
-                    icon: Icons.notifications_none_rounded,
-                    title: 'Push Notification',
-                    value: settings.pushNotification,
-                    onChanged: (val) => settings.togglePush(val),
-                    iconColor: primaryColor,
-                    textColor: textPrimary,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Divider(height: 1, color: isDark ? Colors.grey[800] : Colors.grey[100]),
-                  ),
-                  _buildSwitchTile(
-                    icon: Icons.email_outlined,
-                    title: 'Email Notification',
-                    value: settings.emailNotification,
-                    onChanged: (val) => settings.toggleEmail(val),
-                    iconColor: primaryColor,
-                    textColor: textPrimary,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Divider(height: 1, color: isDark ? Colors.grey[800] : Colors.grey[100]),
-                  ),
-                  _buildSwitchTile(
-                    icon: Icons.sms_outlined,
-                    title: 'SMS Notification',
-                    value: settings.smsNotification,
-                    onChanged: (val) => settings.toggleSms(val),
-                    iconColor: primaryColor,
-                    textColor: textPrimary,
-                    isLast: true,
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 32),
-
             // --- SECTION PENGATURAN AKUN ---
             _buildSectionHeader("Akun & Keamanan", textSecondary),
             const SizedBox(height: 12),
@@ -252,7 +264,7 @@ class ProfileScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.02),
+                    color: Colors.black.withOpacity(0.02),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -306,7 +318,7 @@ class ProfileScreen extends StatelessWidget {
             Center(
               child: Text(
                 "Versi Aplikasi 1.0.0",
-                style: TextStyle(color: textSecondary.withValues(alpha: 0.5), fontSize: 12),
+                style: TextStyle(color: textSecondary.withOpacity(0.5), fontSize: 12),
               ),
             ),
             const SizedBox(height: 30),
@@ -334,7 +346,6 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  // --- WIDGET HELPER ---
   Widget _buildProfileTile({
     required IconData icon,
     required String title,
@@ -359,7 +370,7 @@ class ProfileScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: iconColor.withValues(alpha: 0.1),
+                  color: iconColor.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(icon, color: iconColor, size: 22),
@@ -414,7 +425,7 @@ class ProfileScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: iconColor.withValues(alpha: 0.1),
+              color: iconColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, color: iconColor, size: 22),
@@ -433,7 +444,6 @@ class ProfileScreen extends StatelessWidget {
           Switch.adaptive(
             value: value,
             onChanged: onChanged,
-            // ignore: deprecated_member_use
             activeColor: iconColor,
           ),
         ],
@@ -441,7 +451,6 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  // --- LOGOUT DIALOG ---
   void _showLogoutDialog(BuildContext context, AuthProvider auth, bool isDark) {
     showDialog(
       context: context,
@@ -483,7 +492,6 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  // --- DELETE ACCOUNT DIALOG ---
   void _showDeleteAccountDialog(BuildContext context, AuthProvider auth, bool isDark) {
     showDialog(
       context: context,
@@ -506,7 +514,7 @@ class ProfileScreen extends StatelessWidget {
           ),
           ElevatedButton(
             onPressed: () async {
-              Navigator.pop(ctx); // Close dialog
+              Navigator.pop(ctx);
               final success = await auth.deleteAccount();
               if (success && context.mounted) {
                 Navigator.of(context).pushAndRemoveUntil(

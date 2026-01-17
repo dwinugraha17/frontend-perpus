@@ -2,21 +2,19 @@ import 'package:flutter/foundation.dart';
 
 class AppConstants {
   // 1. UBAH KE 'false' jika ingin pakai Localhost, 'true' jika ingin pakai Railway
-  static const bool _isProduction = true;
 
   // 2. JIKA PAKAI HP FISIK: Isi dengan IP Laptop (misal '192.168.1.10').
   //    JIKA PAKAI EMULATOR / WEB / WINDOWS APP: Biarkan kosong ''.
-  static const String _physicalDeviceIp = '192.168.68.102'; 
+  static const String _physicalDeviceIp = ''; 
 
-  static const String _railwayUrl = 'https://library-backen-production.up.railway.app/api';
+  
 
   static String get baseUrl {
     // A. Mode Production (Railway)
-    if (_isProduction) {
-      return _railwayUrl;
-    }
+  
 
     // B. Mode Development (Localhost)
+    
     
     // 1. Jika Web (Prioritas utama untuk development di browser)
     if (kIsWeb) {

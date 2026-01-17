@@ -32,10 +32,14 @@ class ApiService {
     ).timeout(const Duration(seconds: 30));
   }
 
-  Future<http.Response> get(String endpoint) async {
+  Future<http.Response> get(String endpoint, {Map<String, String>? queryParams}) async {
     final headers = await _getHeaders();
+    var uri = Uri.parse('${AppConstants.baseUrl}$endpoint');
+    if (queryParams != null && queryParams.isNotEmpty) {
+      uri = uri.replace(queryParameters: queryParams);
+    }
     return await http.get(
-      Uri.parse('${AppConstants.baseUrl}$endpoint'),
+      uri,
       headers: headers,
     ).timeout(const Duration(seconds: 30));
   }

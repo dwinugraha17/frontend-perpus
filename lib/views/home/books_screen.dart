@@ -1,3 +1,7 @@
+// ignore_for_file: use_build_context_synchronously, deprecated_member_use
+
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:unilam_library/providers/library_provider.dart';
@@ -14,6 +18,8 @@ class BooksScreen extends StatefulWidget {
 class _BooksScreenState extends State<BooksScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _selectedCategory = "Semua";
+  Timer? _debounce;
+
   final List<String> _categories = [
     "Semua",
     "Teknologi",
@@ -26,23 +32,32 @@ class _BooksScreenState extends State<BooksScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    // Initial fetch
+    Future.microtask(() => 
+      Provider.of<LibraryProvider>(context, listen: false).fetchBooks()
+    );
+  }
+
+  @override
   void dispose() {
     _searchController.dispose();
+    _debounce?.cancel();
     super.dispose();
+  }
+
+  void _performSearch() {
+    Provider.of<LibraryProvider>(context, listen: false).fetchBooks(
+      search: _searchController.text,
+      category: _selectedCategory,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final library = Provider.of<LibraryProvider>(context);
     
-    // Filter logic
-    final filteredBooks = library.books.where((book) {
-      final matchesSearch = book.title.toLowerCase().contains(_searchController.text.toLowerCase()) ||
-                            book.author.toLowerCase().contains(_searchController.text.toLowerCase());
-      final matchesCategory = _selectedCategory == "Semua" || book.category == _selectedCategory;
-      return matchesSearch && matchesCategory;
-    }).toList();
-
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC), // Slate 50
       body: CustomScrollView(
@@ -82,7 +97,12 @@ class _BooksScreenState extends State<BooksScreen> {
                   ),
                   child: TextField(
                     controller: _searchController,
-                    onChanged: (value) => setState(() {}),
+                    onChanged: (value) {
+                      if (_debounce?.isActive ?? false) _debounce!.cancel();
+                      _debounce = Timer(const Duration(milliseconds: 500), () {
+                        _performSearch();
+                      });
+                    },
                     decoration: InputDecoration(
                       hintText: 'Cari judul, penulis, atau ISBN...',
                       hintStyle: TextStyle(color: Colors.grey[500], fontSize: 14),
@@ -92,7 +112,10 @@ class _BooksScreenState extends State<BooksScreen> {
                       suffixIcon: _searchController.text.isNotEmpty
                           ? IconButton(
                               icon: const Icon(Icons.close, size: 20, color: Colors.grey),
-                              onPressed: () => setState(() => _searchController.clear()),
+                              onPressed: () {
+                                _searchController.clear();
+                                _performSearch();
+                              },
                             )
                           : null,
                     ),
@@ -122,9 +145,10 @@ class _BooksScreenState extends State<BooksScreen> {
                         setState(() {
                           _selectedCategory = category;
                         });
+                        _performSearch();
                       },
                       backgroundColor: Colors.white,
-                      selectedColor: const Color(0xFF2563EB).withValues(alpha: 0.1), // Blue 600 with opacity
+                      selectedColor: const Color(0xFF2563EB).withOpacity(0.1),
                       checkmarkColor: const Color(0xFF2563EB),
                       labelStyle: TextStyle(
                         color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF64748B),
@@ -150,7 +174,7 @@ class _BooksScreenState extends State<BooksScreen> {
               ? const SliverFillRemaining(
                   child: Center(child: CircularProgressIndicator()),
                 )
-              : filteredBooks.isEmpty
+              : library.books.isEmpty
                   ? SliverFillRemaining(
                       child: Center(
                         child: Column(
@@ -177,10 +201,10 @@ class _BooksScreenState extends State<BooksScreen> {
                         ),
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
-                            final book = filteredBooks[index];
+                            final book = library.books[index];
                             return _buildBookCard(context, book);
                           },
-                          childCount: filteredBooks.length,
+                          childCount: library.books.length,
                         ),
                       ),
                     ),
@@ -206,7 +230,7 @@ class _BooksScreenState extends State<BooksScreen> {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
+              color: Colors.black.withOpacity(0.04),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -248,7 +272,7 @@ class _BooksScreenState extends State<BooksScreen> {
                           end: Alignment.bottomCenter,
                           colors: [
                             Colors.transparent,
-                            Colors.black.withValues(alpha: 0.0),
+                            Colors.black.withOpacity(0.0),
                           ],
                         ),
                       ),
@@ -261,11 +285,11 @@ class _BooksScreenState extends State<BooksScreen> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: isAvailable ? Colors.green.withValues(alpha: 0.9) : Colors.orange.withValues(alpha: 0.9),
+                        color: isAvailable ? Colors.green.withOpacity(0.9) : Colors.orange.withOpacity(0.9),
                         borderRadius: BorderRadius.circular(8),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.1),
+                            color: Colors.black.withOpacity(0.1),
                             blurRadius: 4,
                             offset: const Offset(0, 2),
                           )

@@ -97,11 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: CircleAvatar(
                 radius: 16,
                 backgroundColor: Colors.grey[200],
-                backgroundImage: auth.user?.profilePhoto != null
-                    ? (kIsWeb
-                        ? NetworkImage(auth.user!.profilePhoto!)
-                        : CachedNetworkImageProvider(auth.user!.profilePhoto!)) as ImageProvider
-                    : null,
+                backgroundImage: _buildProfileImageProvider(auth.user?.profilePhoto),
                 child: auth.user?.profilePhoto == null
                     ? Icon(Icons.person, color: Colors.grey[400], size: 20)
                     : null,
@@ -158,6 +154,31 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
     );
+  }
+
+  ImageProvider? _buildProfileImageProvider(String? photoUrl) {
+    if (photoUrl == null) {
+      return null;
+    }
+
+    if (photoUrl.startsWith('data:image')) {
+      try {
+        final UriData? data = Uri.parse(photoUrl).data;
+        if (data != null && data.mimeType.startsWith('image/')) {
+          return MemoryImage(data.contentAsBytes());
+        }
+      } catch (e) {
+        debugPrint('Error parsing Base64 URI in _buildProfileImageProvider: $e');
+        return null;
+      }
+    }
+    
+    // Fallback if not Base64 (should not happen after backend change)
+    if (kIsWeb) {
+      return NetworkImage(photoUrl);
+    } else {
+      return CachedNetworkImageProvider(photoUrl);
+    }
   }
 
   // --- WIDGET SECTION PER KATEGORI ---

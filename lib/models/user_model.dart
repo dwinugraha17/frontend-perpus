@@ -1,3 +1,6 @@
+// ignore: unused_import
+import 'package:unilam_library/core/constants.dart';
+
 class UserModel {
   final String id;
   final String name;
@@ -13,14 +16,13 @@ class UserModel {
     this.profilePhoto,
   });
 
-      factory UserModel.fromJson(Map<String, dynamic> json) {
-      String? photoUrl = json['profile_photo'];
-  
-      return UserModel(
-        id: json['id'],      name: json['name'],
+  factory UserModel.fromJson(Map<String, dynamic> json) {
+    return UserModel(
+      id: json['id'].toString(),
+      name: json['name'],
       email: json['email'],
       phoneNumber: json['phone_number'],
-      profilePhoto: photoUrl,
+      profilePhoto: json['profile_photo'], // Use the value directly from the backend
     );
   }
 
