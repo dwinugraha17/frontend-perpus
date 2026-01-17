@@ -1,44 +1,55 @@
 #!/bin/bash
-set -e # Hentikan script jika ada perintah yang error
+set -e
 
-echo "--- 1. Checking Environment ---"
+echo "=== STARTING BUILD SCRIPT ==="
 echo "Current directory: $(pwd)"
 
-# Download Flutter SDK (Hanya jika belum ada)
-if [ ! -d "flutter" ]; then
-    echo "--- 2. Cloning Flutter SDK ---"
-    git clone https://github.com/flutter/flutter.git -b stable --depth 1
-else
-    echo "--- 2. Flutter SDK found, skipping clone ---"
+# 1. Clean up potential corrupted cache
+if [ -d "flutter" ] && [ ! -f "flutter/bin/flutter" ]; then
+    echo "WARNING: Flutter directory exists but binary is missing. Removing..."
+    rm -rf flutter
 fi
 
-# Add flutter to path
-export PATH="$PATH:`pwd`/flutter/bin"
+# 2. Download Flutter SDK if missing
+if [ ! -d "flutter" ]; then
+    echo "--- Cloning Flutter SDK (Stable) ---"
+    git clone https://github.com/flutter/flutter.git -b stable --depth 1
+else
+    echo "--- Flutter SDK found, skipping clone ---"
+fi
 
-# Run flutter doctor
-echo "--- 3. Running Flutter Doctor ---"
+# 3. Setup Path
+export PATH="$(pwd)/flutter/bin:$PATH"
+
+# 4. Verify Flutter Installation
+echo "--- Verifying Flutter ---"
+if ! command -v flutter &> /dev/null; then
+    echo "ERROR: Flutter command not found in PATH!"
+    exit 1
+fi
 flutter doctor -v
 
-# Enable web support
+# 5. Config
+echo "--- Configuring Flutter ---"
 flutter config --enable-web
+flutter config --no-analytics
 
-# Get Dependencies
-echo "--- 4. Getting Packages ---"
+# 6. Install Dependencies
+echo "--- Installing Dependencies ---"
 flutter pub get
 
-# Build the web app
-echo "--- 5. Building Web App ---"
-# Tambahkan --verbose jika ingin log sangat detail, tapi --release sudah cukup biasanya
-flutter build web --release --web-renderer html --no-tree-shake-icons
+# 7. Build
+echo "--- Building Web App ---"
+# Menggunakan command build standar tanpa flag eksperimental untuk stabilitas
+flutter build web --release --web-renderer html
 
-# Check build result
+# 8. Check Output
 if [ ! -d "build/web" ]; then
-    echo "ERROR: Folder build/web tidak ditemukan! Build gagal."
+    echo "ERROR: Build directory 'build/web' not found!"
     exit 1
 fi
 
-echo "--- 6. Copying Output ---"
-# Copy output to public folder (Vercel looks here)
+echo "--- Copying Build Artifacts ---"
 cp -r build/web/* .
 
-echo "--- SUCCESS! ---"
+echo "=== BUILD SUCCESSFUL ==="
