@@ -41,7 +41,7 @@ flutter pub get
 # 7. Build
 echo "--- Building Web App ---"
 # Force HTML renderer for better compatibility and avoid black screen
-flutter build web --release --web-renderer html
+flutter build web --release --web-renderer html --base-href /
 
 # 8. Check Output
 if [ ! -d "build/web" ]; then
