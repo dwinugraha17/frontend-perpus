@@ -24,10 +24,6 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  static const String apiBaseUrl = String.fromEnvironment(
-    'API_URL',
-    defaultValue: 'http://localhost:8000/api');
-  
   const MyApp({super.key});
 
   @override
