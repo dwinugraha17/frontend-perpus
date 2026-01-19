@@ -3,6 +3,7 @@ set -x
 set -e
 
 echo "=== STARTING BUILD SCRIPT ==="
+cd "$(dirname "$0")"
 echo "Current directory: $(pwd)"
 
 # 1. Clean up potential corrupted cache
