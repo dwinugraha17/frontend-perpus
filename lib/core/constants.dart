@@ -10,16 +10,8 @@ class AppConstants {
   
 
   static String get baseUrl {
-    // FORCE RELATIVE PATH FOR WEB TO BYPASS CORS VIA VERCEL PROXY
-    if (kIsWeb) {
-      return '/api';
-    }
-    
-    // Fallback for non-web
-    if (kReleaseMode) {
-      return 'https://library-backend-production.up.railway.app/api';
-    }
-    return 'http://127.0.0.1:8000/api';
+    // FORCE RELATIVE PATH FOR WEB TO BYPASS CORS
+    return '/api';
   }
 
   static const String appName = 'UNILAM Library';

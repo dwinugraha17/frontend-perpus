@@ -56,7 +56,4 @@ fi
 echo "--- List of generated files (Debug) ---"
 ls -F build/web/
 
-echo "--- Copying Build Artifacts to Root ---"
-cp -r build/web/* .
-
 echo "=== BUILD SUCCESSFUL ==="
