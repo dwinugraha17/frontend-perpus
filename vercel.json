@@ -4,7 +4,7 @@
     "rewrites": [
         {
             "source": "/api/(.*)",
-            "destination": "https://library-backend-production.up.railway.app/api/$1"
+            "destination": "https://library-backen-production.up.railway.app/api/$1"
         },
         {
             "source": "/(.*)",
