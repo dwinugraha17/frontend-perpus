@@ -8,8 +8,8 @@ class AppConstants {
   
 
   static String get baseUrl {
-    // USE DIRECT RAILWAY URL - CORS IS NOW HANDLED BY BACKEND MIDDLEWARE
-    return 'https://library-backend-production.up.railway.app/api';
+    // FIX TYPO: backen (without d) to match your repository name
+    return 'https://library-backen-production.up.railway.app/api';
   }
 
   static const String appName = 'UNILAM Library';
