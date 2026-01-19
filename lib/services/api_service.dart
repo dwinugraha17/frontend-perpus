@@ -24,7 +24,7 @@ class ApiService {
   Future<http.Response> post(String endpoint, Map<String, dynamic> body) async {
     final headers = await _getHeaders();
     final url = '${AppConstants.baseUrl}$endpoint';
-    debugPrint('[API] POST: $url');
+    debugPrint('[API-v2] POST: $url');
     return await http.post(
       Uri.parse(url),
       headers: headers,
