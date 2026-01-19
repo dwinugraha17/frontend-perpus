@@ -13,6 +13,10 @@ class AppConstants {
     
     // A. Mode Production (Railway)
     if (kReleaseMode) {
+      if (kIsWeb) {
+        // Use Vercel Proxy to avoid CORS
+        return 'https://frontend-perpus-nu.vercel.app/api';
+      }
       return 'https://library-backend-production.up.railway.app/api';
     }
 
