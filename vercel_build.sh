@@ -1,4 +1,5 @@
-#!/bin/bash
+﻿#!/bin/bash
+set -x
 set -e
 
 echo "=== STARTING BUILD SCRIPT ==="
@@ -31,7 +32,9 @@ flutter doctor -v
 
 # 5. Config
 echo "--- Configuring Flutter ---"
-flutter config --enable-web
+# Enable web is default in stable now, but harmless to keep if syntax is correct
+# We skip it to reduce potential flag parsing issues, or keep it simple.
+# flutter config --enable-web 
 flutter config --no-analytics
 
 # 6. Install Dependencies
@@ -40,11 +43,13 @@ flutter pub get
 
 # 7. Build
 echo "--- Building Web App ---"
-flutter build web --release --web-renderer html --base-href /
+# Added --verbose to see more details if it fails
+flutter build web --release --web-renderer html --base-href / --verbose
 
 # 8. Check Output & Move to Root
 if [ ! -d "build/web" ]; then
     echo "ERROR: Build directory 'build/web' not found!"
+    ls -R build/
     exit 1
 fi
 
