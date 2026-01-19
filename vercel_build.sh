@@ -40,16 +40,13 @@ flutter pub get
 
 # 7. Build
 echo "--- Building Web App ---"
-# Menggunakan command build standar tanpa flag eksperimental untuk stabilitas
-flutter build web --release
+# Force HTML renderer for better compatibility and avoid black screen
+flutter build web --release --web-renderer html
 
 # 8. Check Output
 if [ ! -d "build/web" ]; then
     echo "ERROR: Build directory 'build/web' not found!"
     exit 1
 fi
-
-echo "--- Copying Build Artifacts ---"
-cp -r build/web/* .
 
 echo "=== BUILD SUCCESSFUL ==="
