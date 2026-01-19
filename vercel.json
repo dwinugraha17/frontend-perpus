@@ -5,13 +5,13 @@
             "src": "vercel_build.sh",
             "use": "@vercel/static-build",
             "config": {
-                "distDir": "build/web"
+                "distDir": "."
             }
         }
     ],
     "rewrites": [
         {
-            "source": "/((?!.*\\.).*)",
+            "source": "/(.*)",
             "destination": "/index.html"
         }
     ]

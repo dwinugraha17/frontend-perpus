@@ -40,13 +40,18 @@ flutter pub get
 
 # 7. Build
 echo "--- Building Web App ---"
-# Force HTML renderer for better compatibility and avoid black screen
 flutter build web --release --web-renderer html --base-href /
 
-# 8. Check Output
+# 8. Check Output & Move to Root
 if [ ! -d "build/web" ]; then
     echo "ERROR: Build directory 'build/web' not found!"
     exit 1
 fi
+
+echo "--- List of generated files (Debug) ---"
+ls -F build/web/
+
+echo "--- Copying Build Artifacts to Root ---"
+cp -r build/web/* .
 
 echo "=== BUILD SUCCESSFUL ==="
