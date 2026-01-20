@@ -72,10 +72,18 @@ class LibraryProvider with ChangeNotifier {
     try {
       final response = await _apiService.get('/books/$bookId');
       if (response.statusCode == 200) {
-        return BookModel.fromJson(jsonDecode(response.body));
+        final data = jsonDecode(response.body);
+        debugPrint('Book Details Fetched: ${data['title']}');
+        if (data['reviews'] != null) {
+           debugPrint('Reviews count: ${(data['reviews'] as List).length}');
+           // debugPrint('First review: ${data['reviews'][0]}');
+        } else {
+           debugPrint('Reviews key is null/missing');
+        }
+        return BookModel.fromJson(data);
       }
     } catch (e) {
-      debugPrint(e.toString());
+      debugPrint('Error fetching book detail: $e');
     }
     return null;
   }
