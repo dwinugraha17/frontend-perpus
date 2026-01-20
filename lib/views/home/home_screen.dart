@@ -344,7 +344,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 const Icon(Icons.star_rounded, size: 14, color: Colors.amber),
                 const SizedBox(width: 4),
                 Text(
-                  "4.8", 
+                  book.averageRating.toStringAsFixed(1), 
                   style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: textPrimary),
                 ),
              ],
@@ -395,6 +395,9 @@ class _HomeScreenState extends State<HomeScreen> {
               border: Border.all(color: Colors.grey.shade200),
             ),
             child: TextField(
+              onSubmitted: (value) {
+                Provider.of<LibraryProvider>(context, listen: false).fetchBooks(search: value);
+              },
               decoration: InputDecoration(
                 hintText: 'Cari judul, penulis, atau ISBN...',
                 hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),

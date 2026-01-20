@@ -31,9 +31,9 @@ class BookModel {
       title: json['title'],
       author: json['author'],
       description: json['description'],
-      coverImage: json['cover_image'],
-      pdfUrl: json['pdf_url'],
-      status: json['status'],
+      coverImage: json['cover_image'] ?? '',
+      pdfUrl: json['book_file'],
+      status: json['status'] ?? 'Unavailable',
       category: json['category'] ?? 'Umum',
       averageRating: (json['average_rating'] as num?)?.toDouble() ?? 0.0,
       reviews: (json['reviews'] as List?)

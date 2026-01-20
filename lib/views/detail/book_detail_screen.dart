@@ -1,6 +1,8 @@
 import 'dart:ui';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:unilam_library/models/book_model.dart';
 import 'package:unilam_library/models/review_model.dart';
 import 'package:unilam_library/providers/library_provider.dart';
@@ -49,6 +51,30 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
 
   String _formatDate(DateTime date) {
     return "${date.day}/${date.month}/${date.year}";
+  }
+
+  ImageProvider? _buildProfileImageProvider(String? photoUrl) {
+    if (photoUrl == null) {
+      return null;
+    }
+
+    if (photoUrl.startsWith('data:image')) {
+      try {
+        final UriData? data = Uri.parse(photoUrl).data;
+        if (data != null && data.mimeType.startsWith('image/')) {
+          return MemoryImage(data.contentAsBytes());
+        }
+      } catch (e) {
+        debugPrint('Error parsing Base64 URI in _buildProfileImageProvider: $e');
+        return null;
+      }
+    }
+
+    if (kIsWeb) {
+      return NetworkImage(photoUrl);
+    } else {
+      return CachedNetworkImageProvider(photoUrl);
+    }
   }
 
   void _showBorrowDialog(BuildContext context) async {
@@ -458,9 +484,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
             children: [
               CircleAvatar(
                 radius: 16,
-                backgroundImage: review.userPhoto != null 
-                    ? NetworkImage(review.userPhoto!) 
-                    : null,
+                backgroundImage: _buildProfileImageProvider(review.userPhoto),
                 child: review.userPhoto == null 
                     ? Icon(Icons.person, size: 20) 
                     : null,
